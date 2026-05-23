@@ -7,7 +7,7 @@ export default defineConfig({
   plugins: [vue()],
   resolve: {
     alias: {
-      '@': path.resolve(__dirname, 'src'), // 配置 @ 别名指向src目录
+      '@': path.resolve(__dirname, 'src'), // 配置 @ 别名指向 src目录
     },
   },
 })
