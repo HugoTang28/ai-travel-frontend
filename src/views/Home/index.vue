@@ -101,7 +101,7 @@ const onCityConfirm = ({ selectedValues }) => {
 }
 
 const handleSubmit = () => {
-  loading.value = true;
+  // loading.value = true;
 }
 
 </script>
