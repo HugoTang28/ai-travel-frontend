@@ -1,6 +1,9 @@
 <template>
-  首页
+  <div id="app"> 
+    <router-view />
+  </div>
 </template>
 
 <script setup>
+
 </script>
