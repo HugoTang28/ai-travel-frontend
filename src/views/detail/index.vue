@@ -15,7 +15,7 @@
           <van-button type="primary" @click="fetchData">重试</van-button>
         </van-empty>
       </div>
-      <template v-else-if="tripData && tripData.success !== false">
+      <template v-else-if="tripData && tripData.success === true">
         <div class="card overview-card">
           <div class="trip-header">
             <h2>{{ tripData.city }} . {{ tripData.days }}</h2>
@@ -24,23 +24,23 @@
         </div>
         <van-collapse v-model="activeDays" class="trip-collapse">
           <van-collapse-item
-           v-for="day in tripData.days"
-           :key="day.days"
-           :title="'第'+day.day+'天'"
-           :name="day.days"
+           v-for="day in tripData.dailyItinerary"
+           :key="day.day"
+           :title="'第'+ day.day +'天'"
+           :name="day.day"
           >
             <div class="day-schedule">
               <div class="day-section">
                 <div class="section-label morning">上午</div>
-                <SpotItem data="day.morning"></SpotItem>
+                <SpotItem :data="day.morning"></SpotItem>
               </div>
               <div class="day-section">
                 <div class="section-label afternoon">下午</div>
-                <SpotItem data="day.afternoon"></SpotItem>
+                <SpotItem :data="day.afternoon"></SpotItem>
               </div>
               <div class="day-section">
                 <div class="section-label evening">晚上</div>
-                <SpotItem data="day.evening"></SpotItem>
+                <SpotItem :data="day.evening"></SpotItem>
               </div>
             </div>
           </van-collapse-item>
@@ -49,7 +49,7 @@
           <div class="section-title">
             预算明细
           </div>
-          <BudgetTable data="tripData.budgetBreakdown" :total="tripData.totalBudget"></BudgetTable>
+          <BudgetTable :data="tripData.budgetBreakdown" :total="tripData.totalBudget"></BudgetTable>
         </div>
         <div class="card tips-card" v-if="tripData.tips && tripData.tips.length">
           <div class="section-title">
@@ -59,17 +59,17 @@
             <li v-for="(tip, index) in tripData.tips" :key="index">{{ tip }}</li>
           </ul>
         </div>
-        <div class="card wanings-card" v-if="tripData.wanings && tripData.wanings.length">
+        <div class="card warnings-card" v-if="tripData.warnings && tripData.warnings.length">
           <div class="section-title">
             注意事项
           </div>
-          <ul class="wanings-list">
-            <li v-for="(waning, index) in tripData.wanings" :key="index">{{ waning }}</li>
+          <ul class="warnings-list">
+            <li v-for="(warning, index) in tripData.warnings" :key="index">{{ warning }}</li>
           </ul>
         </div>
       </template>
     </div>
-    <div class="detail-footer" v-if="tripData && tripData.success !== false">
+    <div class="detail-footer" v-if="tripData && tripData.success === true">
       <van-button type="primary" size="large" round @click="goChat">
         咨询AI助手
       </van-button>
@@ -96,21 +96,22 @@ const goBack = () => {
   router.back()
 }
 const tripData = ref(null)
-const errorMsg = ref('')
-const activeDays = ref(null)
+const errorMsg = ref(null)
+const activeDays = ref([])
 const fetchData = async () => { 
-  
+  isLoading.value = true
   const res = await post('/recommend', {
     city: formData.city,
     budget: formData.budget,
     days: formData.days
   })
+  console.log(res)
   if (res.success && res.success !== false) {
-    tripData.value = res.data
+    tripData.value = res
   } else {
     errorMsg.value = res.message
   }
-  isLoading.value = fasle
+  isLoading.value = false
 }
 const goChat = () => {
   router.push({
