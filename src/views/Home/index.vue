@@ -65,7 +65,25 @@
            开始规划
         </van-button>
       </div>
-      <div class="card">
+      <!-- 快捷入口 -->
+      <div class="card quick-actions">
+        <div class="section-title">
+          快捷入口
+        </div>
+        <van-grid :column-num="2" :gutter="12">
+          <van-grid-item to="/chat" icon="chat-o" text="AI对话" />
+          <van-grid-item to="/user" icon="user-o" text="我的" />
+        </van-grid>
+      </div>
+      <div class="card popular-destination">
+        <div class="section-title">
+          热门目的地
+        </div>
+        <van-grid :column-num="4" :gutter="8">
+          <van-grid-item @click="selectCity(item)" v-for="(item, index) in popularCity" :key="index">
+            <div class="city-tag" :class="{activecity: formData.city === item}">{{ item }}</div>
+          </van-grid-item>
+        </van-grid>
       </div>
     </div>
   </div>
@@ -88,6 +106,11 @@ const allCityList = [
   '昆明', '贵阳', '南宁', '桂林', '海口', '三亚', '丽江', '大理',
   '西安', '兰州', '乌鲁木齐', '拉萨', '呼和浩特', '太原', '石家庄'
 ]
+const popularCity = allCityList.slice(0, 12);
+const selectCity = (city) => {
+  formData.city = city;
+  showBottom.value = false;
+}
 const cityList = allCityList.map( item => (
   {
     text: item,
@@ -101,7 +124,7 @@ const onCityConfirm = ({ selectedValues }) => {
 }
 
 const handleSubmit = () => {
-  // loading.value = true;
+  loading.value = true;
 }
 
 </script>
@@ -109,9 +132,24 @@ const handleSubmit = () => {
 .search-card {
   margin: 16px 0;
   .city-field {
-    background: #f7f8fa;
+    background-color: #f7f8fa;
     border-radius: 8px;
     margin-bottom: 12px;
   }
+}
+.city-tag.activecity {
+  background-color: #1989fa;
+  color: #fff;
+}
+.city-tag {
+  // width: 100%;
+  // height: 100%;
+  padding: 4px 8px;
+  border-radius: 16px;
+  background-color: #f7f8fa;
+  color: #333;
+  cursor: pointer;
+  font-size: 14px;
+  transition: all 0.3s;
 }
 </style>
