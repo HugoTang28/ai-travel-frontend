@@ -10,6 +10,69 @@
           正在生成旅游规划...
         </van-loading>
       </div>
+      <div v-else-if="errorMsg">
+        <van-empty description="errorMsg">
+          <van-button type="primary" @click="fetchData">重试</van-button>
+        </van-empty>
+      </div>
+      <template v-else-if="tripData && tripData.success !== false">
+        <div class="card overview-card">
+          <div class="trip-header">
+            <h2>{{ tripData.city }} . {{ tripData.days }}</h2>
+            <span class="trip-budget">预算：{{ tripData.totalBudget }}元</span>
+          </div>
+        </div>
+        <van-collapse v-model="activeDays" class="trip-collapse">
+          <van-collapse-item
+           v-for="day in tripData.days"
+           :key="day.days"
+           :title="'第'+day.day+'天'"
+           :name="day.days"
+          >
+            <div class="day-schedule">
+              <div class="day-section">
+                <div class="section-label morning">上午</div>
+                <SpotItem data="day.morning"></SpotItem>
+              </div>
+              <div class="day-section">
+                <div class="section-label afternoon">下午</div>
+                <SpotItem data="day.afternoon"></SpotItem>
+              </div>
+              <div class="day-section">
+                <div class="section-label evening">晚上</div>
+                <SpotItem data="day.evening"></SpotItem>
+              </div>
+            </div>
+          </van-collapse-item>
+        </van-collapse>
+        <div class="card budget-card" v-if="tripData.budgetBreakdown">
+          <div class="section-title">
+            预算明细
+          </div>
+          <BudgetTable data="tripData.budgetBreakdown" :total="tripData.totalBudget"></BudgetTable>
+        </div>
+        <div class="card tips-card" v-if="tripData.tips && tripData.tips.length">
+          <div class="section-title">
+            温馨提示
+          </div>
+          <ul class="tips-list">
+            <li v-for="(tip, index) in tripData.tips" :key="index">{{ tip }}</li>
+          </ul>
+        </div>
+        <div class="card wanings-card" v-if="tripData.wanings && tripData.wanings.length">
+          <div class="section-title">
+            注意事项
+          </div>
+          <ul class="wanings-list">
+            <li v-for="(waning, index) in tripData.wanings" :key="index">{{ waning }}</li>
+          </ul>
+        </div>
+      </template>
+    </div>
+    <div class="detail-footer" v-if="tripData && tripData.success !== false">
+      <van-button type="primary" size="large" round @click="goChat">
+        咨询AI助手
+      </van-button>
     </div>
   </div>
 </template>
@@ -18,6 +81,8 @@
 import { reactive, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { post } from '../../utils/request.js'
+import SpotItem from '../../components/SpotItem.vue'
+import BudgetTable from '../../components/BudgetTable.vue'
 
 const isLoading = ref(false)
 const formData = reactive({
@@ -30,28 +95,148 @@ const router = useRouter()
 const goBack = () => {
   router.back()
 }
-
+const tripData = ref(null)
+const errorMsg = ref('')
+const activeDays = ref(null)
 const fetchData = async () => { 
-  const res = post('/recommend', {
+  
+  const res = await post('/recommend', {
     city: formData.city,
     budget: formData.budget,
     days: formData.days
   })
-  console.log(res)
+  if (res.success && res.success !== false) {
+    tripData.value = res.data
+  } else {
+    errorMsg.value = res.message
+  }
+  isLoading.value = fasle
+}
+const goChat = () => {
+  router.push({
+    path: '/chat',
+    query: {
+      scene: 'detail',
+      city: formData.city,
+    }
+  })
 }
 onMounted(() => { 
   formData.city = route.query.city
   formData.budget = route.query.budget
   formData.days = route.query.days
   if (formData.city && formData.budget && formData.days) {
-    isLoading.value = true
     fetchData()
   }
 })
 </script>
 
 <style lang="scss" scoped>
+.page-header {
+  height: 44px;
+}
 .overview-card {
   margin-bottom: 16px;
+}
+
+.trip-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+.trip-header h2 {
+  font-size: 20px;
+  color: #323233;
+  margin: 0;
+}
+
+.trip-budget {
+  font-size: 16px;
+  color: #ee0a24;
+  font-weight: 600;
+}
+
+.trip-collapse {
+  margin-bottom: 16px;
+}
+
+.day-schedule {
+  padding: 8px 0;
+}
+
+.schedule-section {
+  margin-bottom: 16px;
+}
+
+.schedule-section:last-child {
+  margin-bottom: 0;
+}
+
+.section-label {
+  font-size: 14px;
+  font-weight: 600;
+  padding: 4px 8px;
+  border-radius: 4px;
+  display: inline-block;
+  margin-bottom: 8px;
+}
+
+.section-label.morning {
+  background: #fff7e6;
+  color: #fa8c16;
+}
+
+.section-label.afternoon {
+  background: #e6f7ff;
+  color: #1890ff;
+}
+
+.section-label.evening {
+  background: #f6ffed;
+  color: #52c41a;
+}
+
+.budget-card,
+.tips-card,
+.warnings-card {
+  margin-bottom: 16px;
+}
+
+.tips-list,
+.warnings-list {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+
+.tips-list li,
+.warnings-list li {
+  padding: 8px 0;
+  color: #666;
+  font-size: 14px;
+  border-bottom: 1px solid #f5f5f5;
+}
+
+.tips-list li:last-child,
+.warnings-list li:last-child {
+  border-bottom: none;
+}
+
+.detail-footer {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding: 12px 16px;
+  background: #fff;
+  box-shadow: 0 -2px 8px rgba(0, 0, 0, 0.05);
+  max-width: 750px;
+  margin: 0 auto;
+}
+
+.error-card {
+  text-align: center;
+  padding: 40px 16px;
 }
 </style>

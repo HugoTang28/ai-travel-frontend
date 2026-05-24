@@ -1,7 +1,7 @@
 <template>
   <div id="app"> 
     <router-view />
-    <van-tabbar v-if="showTabbar" route v-model="active">
+    <van-tabbar v-if="['home','chat','user'].includes(route.name)" route v-model="active">
       <van-tabbar-item to="/home" name="home" icon="home-o">首页</van-tabbar-item>
       <van-tabbar-item to="/chat" name="chat" icon="chat-o">对话</van-tabbar-item>
       <van-tabbar-item to="/user" name="user" icon="user-o">我的</van-tabbar-item>
@@ -16,7 +16,7 @@ import { useRoute } from 'vue-router'
 const route = useRoute()
 const active = ref('home')
 
-const showTabbar = computed(() => route.path !== '/login')
+// const showTabbar = computed(() => route.name === 'home' || route.path === 'chat' || route.path === 'user')
 
 watch(
   () => route.path,
