@@ -90,7 +90,10 @@
 </template>
 <script setup>
 import { reactive, ref } from 'vue';
+import { useRouter } from 'vue-router';
+import { showToast } from 'vant';
 
+const router = useRouter();
 const loading = ref(false);
 const showBottom = ref(false);
 const formData = reactive({
@@ -123,8 +126,49 @@ const onCityConfirm = ({ selectedValues }) => {
   showBottom.value = false;
 }
 
+const showError = () => {
+  // 判断目的地
+  if (!formData.city) {
+    showToast('请选择目的地');
+    return
+  }
+  // 判断预算
+  if (!formData.budget || formData.budget <= 100) {
+    showToast('预算不能低于100元');
+    return
+  }
+  // 判断天数
+  if (!formData.days || formData.days < 1 || formData.days > 30) {
+    showToast('天数必须在1-30天之间');
+    return
+  }
+}
 const handleSubmit = () => {
   loading.value = true;
+  // if (!showError()) return
+    // 判断目的地
+  if (!formData.city) {
+    showToast('请选择目的地');
+    return
+  }
+  // 判断预算
+  if (!formData.budget || formData.budget <= 100) {
+    showToast('预算不能低于100元');
+    return
+  }
+  // 判断天数
+  if (!formData.days || formData.days < 1 || formData.days > 30) {
+    showToast('天数必须在1-30天之间');
+    return
+  }
+  router.push({
+    path: '/detail',
+    query: {
+      city: formData.city,
+      budget: formData.budget,
+      days: formData.days
+    }
+  })
 }
 
 </script>

@@ -25,6 +25,11 @@ const routes = [
     name: 'user',
     component: () => import('@/views/user/index.vue'),
   },
+  {
+    path: '/detail',
+    name: 'detail',
+    component: () => import('@/views/detail/index.vue'),
+  }
 ]
 
 // 创建路由实例
