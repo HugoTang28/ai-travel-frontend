@@ -10,7 +10,7 @@
     </div>
     <!-- 登录表单 -->
     <div class="login-form">
-      <van-form @submit="onSubmit">
+      <van-form>
         <van-cell-group inset>
           <van-field
             v-model="form.username"
@@ -34,6 +34,7 @@
             block 
             type="primary" 
             native-type="submit"
+            @click="goHome"
             class="login-btn"
           >
             登录
@@ -50,7 +51,9 @@
 <script setup>
 import { reactive } from 'vue'
 import { showToast } from 'vant'
+import { useRouter } from 'vue-router'
 
+const router = useRouter()
 // 表单数据
 const form = reactive({
   username: '',
@@ -58,8 +61,15 @@ const form = reactive({
 })
 
 // 提交登录
-const onSubmit = () => {
-  showToast('登录功能暂未实现')
+const goHome = () => { 
+  showToast({
+    message: '登陆成功',
+    position: 'top',
+  });
+  localStorage.setItem('username', form.username)
+  localStorage.setItem('password', form.password)
+  localStorage.setItem('isLogin', true)
+  router.push('/home')
 }
 
 </script>
