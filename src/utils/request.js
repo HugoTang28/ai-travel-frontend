@@ -42,7 +42,7 @@ export async function fetchStream(url, data, onChunk, onComplete, onError) {
     const response = await fetch(`http://localhost:3300/api/travel/${url}`, {
     method: 'post',
     headers: {
-      'Content-type': 'application/json'
+      'Content-Type': 'application/json'
     },
     body: JSON.stringify(data),
     signal: controller.signal
@@ -56,7 +56,7 @@ export async function fetchStream(url, data, onChunk, onComplete, onError) {
   while (true) {
     const { done, value } = await reader.read()
     if (done) break
-    const chunk = decoder.decode(value, { stream: true})
+    const chunk = decoder.decode(value, { stream: true })
     const lines = chunk.split('\n').filter(line => line.trim())
     for (const line of lines) {
       // console.log(line);

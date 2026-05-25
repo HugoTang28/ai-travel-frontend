@@ -24,7 +24,7 @@
       </div>
       <div v-else class="message-list">
         <ChatBubble v-for="msg in messages" :key="msg.id" :message="msg"></ChatBubble>
-        <div class="streaming-indicator" v-if="isSreaming">
+        <div class="streaming-indicator" v-if="isStreaming">
           <van-loading type="spinner" size="20px"></van-loading>
           <span>AI正在思考中...</span>
         </div>
@@ -34,7 +34,7 @@
       <van-field
         v-model="inputMessage"
         placeholder="请输入你的问题"
-        :disabled="isSreaming"
+        :disabled="isStreaming"
         @key.enter="sendMessage"
       >
         <template #button>
@@ -42,7 +42,7 @@
             @click="sendMessage"
             type="primary"
             size="small"
-            :disabled="isSreaming"
+            :disabled="isStreaming"
           >
             发送
           </van-button>
@@ -79,18 +79,18 @@ const addUserMessage = (content) => {
   })
 }
 
-const isSreaming = ref(false)
+const isStreaming = ref(false)
 
 const handleClick = (tag) => {
   inputMessage.value = tag
 }
 
 const fetchAiResponse = (userMsg) => {
-  isSreaming.value = true
+  isStreaming.value = true
   messages.value.push({
     id: Date.now() + 1,
     role: 'ai',
-    userMsg,
+    content: '',
     timestamp: new Date().toISOString,
   })
   let fullResponse = ''
