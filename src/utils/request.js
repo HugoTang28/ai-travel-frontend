@@ -61,12 +61,12 @@ export async function fetchStream(url, data, onChunk, onComplete, onError) {
     for (const line of lines) {
       // console.log(line);
       try {
-        if (line.startsWith('data：')) {
+        if (line.startsWith('data:')) {
         const jsonStr = line.substring(6)
         const jsonData = JSON.parse(jsonStr)
         if (jsonData.type === 'chunk') {
           onChunk(jsonData.content)
-        } else if (jsonData.done) {
+        } else if (jsonData.type === 'complete') {
           onComplete(jsonData.data)
         } else if (jsonData.error) {
           onError(jsonData.error)

@@ -91,7 +91,7 @@ const fetchAiResponse = (userMsg) => {
     id: Date.now() + 1,
     role: 'ai',
     content: '',
-    timestamp: new Date().toISOString,
+    timestamp: new Date().toISOString(),
   })
   let fullResponse = ''
 
@@ -102,20 +102,20 @@ const fetchAiResponse = (userMsg) => {
       lastMsg.content = fullResponse
     }
   }, () => {
-    isSreaming.value = false
+    isStreaming.value = false
   }, (errMsg) => {
     const lastMsg = messages.value[messages.value.length - 1]
     if (lastMsg && lastMsg.role === 'ai') {
       lastMsg.content = `抱歉，AI发生了错误${errMsg}`
     }
-    isSreaming.value = false
+    isStreaming.value = false
     showToast('AI回复失败！')
   })
 }
 
 const sendMessage = () => {
   const msg = inputMessage.value.trim()
-  // if (!msg || isSreaming) {
+  // if (!msg || isStreaming) {
   //   return
   // }
   addUserMessage(msg)
