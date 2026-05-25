@@ -25,7 +25,7 @@
       <div v-else class="message-list">
         <ChatBubble v-for="msg in messages" :key="msg.id" :message="msg"></ChatBubble>
         <div class="streaming-indicator" v-if="isSreaming">
-          <van-loading type="spiner" size="20px"></van-loading>
+          <van-loading type="spinner" size="20px"></van-loading>
           <span>AI正在思考中...</span>
         </div>
       </div>
@@ -75,7 +75,7 @@ const addUserMessage = (content) => {
     id: Date.now(),
     role: 'user',
     content,
-    timestamp: new Date().toISOString,
+    timestamp: new Date().toISOString(),
   })
 }
 
@@ -89,8 +89,8 @@ const fetchAiResponse = (userMsg) => {
   isSreaming.value = true
   messages.value.push({
     id: Date.now() + 1,
-    role: 'user',
-    content,
+    role: 'ai',
+    userMsg,
     timestamp: new Date().toISOString,
   })
   let fullResponse = ''
@@ -115,9 +115,9 @@ const fetchAiResponse = (userMsg) => {
 
 const sendMessage = () => {
   const msg = inputMessage.value.trim()
-  if (!msg || isSreaming) {
-    return
-  }
+  // if (!msg || isSreaming) {
+  //   return
+  // }
   addUserMessage(msg)
   inputMessage.value = ''
   // 进行流式请求
@@ -133,11 +133,12 @@ const sendMessage = () => {
   display: flex;
   flex-direction: column;
   height: 100vh;
-  padding-bottom: 50px;
+  padding-bottom: 0px !important;
 }
 
 .chat-container {
-  flex: 1;
+  // flex: 1;
+  height: 650px;
   overflow-y: auto;
   padding: 16px;
   padding-bottom: 60px;

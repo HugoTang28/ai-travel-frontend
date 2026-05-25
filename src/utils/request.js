@@ -44,7 +44,7 @@ export async function fetchStream(url, data, onChunk, onComplete, onError) {
     headers: {
       'Content-type': 'application/json'
     },
-    body: JSON.stringfy(data),
+    body: JSON.stringify(data),
     signal: controller.signal
   })
 
@@ -57,7 +57,7 @@ export async function fetchStream(url, data, onChunk, onComplete, onError) {
     const { done, value } = await reader.read()
     if (done) break
     const chunk = decoder.decode(value, { stream: true})
-    const lines = chunk.spilt('\n').filter(line => line.trim())
+    const lines = chunk.split('\n').filter(line => line.trim())
     for (const line of lines) {
       // console.log(line);
       try {
