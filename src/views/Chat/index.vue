@@ -4,22 +4,131 @@
       <van-nav-bar
         title="AI智能助手"
         left-arrow
+        fixed
         left-text="返回"
         @click-left="router.back()"
       >
-
       </van-nav-bar>
+    </div>
+    <div class="chat-container">
+      <div v-if="messages.length === 0" class="chat-empty">
+        <van-empty
+          description="开始和AI助手对话吧"
+        ></van-empty>
+        <div class="quick-questions">
+          <div class="quick-title">常见问题</div>
+          <van-tag @click="handleClick(tag)" v-for="tag in quickQuestions" :key="tag" size="large" mark class="quick-tag">
+            {{ tag }}
+          </van-tag>
+        </div>
+      </div>
+      <div v-else class="message-list">
+        <ChatBubble v-for="msg in messages" :key="msg.id" :message="msg"></ChatBubble>
+        <div class="streaming-indicator" v-if="isSreaming">
+          <van-loading type="spiner" size="20px"></van-loading>
+          <span>AI正在思考中...</span>
+        </div>
+      </div>
+    </div>
+    <div class="chat-input-area">
+      <van-field
+        v-model="inputMessage"
+        placeholder="请输入你的问题"
+        :disabled="isSreaming"
+        @key.enter="sendMessage"
+      >
+        <template #button>
+          <van-button
+            @click="sendMessage"
+            type="primary"
+            size="small"
+            :disabled="isSreaming"
+          >
+            发送
+          </van-button>
+        </template>
+      </van-field>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useRouter } from 'vue-router'
-const router = useRouter()
+import { ref }  from 'vue'
+import { fetchStream } from '../../utils/request.js'
+import { showToast } from 'vant'
+import ChatBubble from '../../components/ChatBubble.vue'
 
+const router = useRouter()
+const inputMessage = ref('')
+// 会话数据
+const messages = ref([])
+const quickQuestions = [
+  '北京有哪些必去的景点？',
+  '上海美食推荐',
+  '成都三日游攻略',
+  '如何选择旅行保险？'
+]
+
+const addUserMessage = (content) => {
+  messages.value.push({
+    id: Date.now(),
+    role: 'user',
+    content,
+    timestamp: new Date().toISOString,
+  })
+}
+
+const isSreaming = ref(false)
+
+const handleClick = (tag) => {
+  inputMessage.value = tag
+}
+
+const fetchAiResponse = (userMsg) => {
+  isSreaming.value = true
+  messages.value.push({
+    id: Date.now() + 1,
+    role: 'user',
+    content,
+    timestamp: new Date().toISOString,
+  })
+  let fullResponse = ''
+
+  fetchStream('chat', {message: userMsg}, (chunk) => {
+    fullResponse += chunk
+    const lastMsg = messages.value[messages.value.length - 1]
+    if (lastMsg && lastMsg.role === 'ai') {
+      lastMsg.content = fullResponse
+    }
+  }, () => {
+    isSreaming.value = false
+  }, (errMsg) => {
+    const lastMsg = messages.value[messages.value.length - 1]
+    if (lastMsg && lastMsg.role === 'ai') {
+      lastMsg.content = `抱歉，AI发生了错误${errMsg}`
+    }
+    isSreaming.value = false
+    showToast('AI回复失败！')
+  })
+}
+
+const sendMessage = () => {
+  const msg = inputMessage.value.trim()
+  if (!msg || isSreaming) {
+    return
+  }
+  addUserMessage(msg)
+  inputMessage.value = ''
+  // 进行流式请求
+  fetchAiResponse(msg)
+}
 </script>
 
 <style lang="scss" scoped>
+.page-header {
+  height: 46px;
+}
 .chat-page {
   display: flex;
   flex-direction: column;

@@ -134,7 +134,7 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .page-container {
-  // height: 100vh;
+  height: 100vh;
 }
 .page-header {
   height: 44px;
