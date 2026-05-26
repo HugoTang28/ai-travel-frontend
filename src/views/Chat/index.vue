@@ -115,9 +115,9 @@ const fetchAiResponse = (userMsg) => {
 
 const sendMessage = () => {
   const msg = inputMessage.value.trim()
-  // if (!msg || isStreaming) {
-  //   return
-  // }
+  if (!msg || isStreaming.value) {
+    return
+  }
   addUserMessage(msg)
   inputMessage.value = ''
   // 进行流式请求
