@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // 创建axios实例
 const request = axios.create({
-  baseURL: 'http://localhost:3300/api/travel',
+  baseURL: 'http://8.163.74.185/api/travel',
   timeout: 1000000,
   headers: {'Content-Type': 'application/json;charset=UTF-8'},
 });
@@ -39,7 +39,7 @@ export async function fetchStream(url, data, onChunk, onComplete, onError) {
   // 创建一个请求控制器
   const controller = new AbortController()
   try {
-    const response = await fetch(`http://localhost:3300/api/travel/${url}`, {
+    const response = await fetch(`http://8.163.74.185/api/travel/${url}`, {
     method: 'post',
     headers: {
       'Content-Type': 'application/json'

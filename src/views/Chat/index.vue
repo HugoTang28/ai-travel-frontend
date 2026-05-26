@@ -53,13 +53,14 @@
 </template>
 
 <script setup>
-import { useRouter } from 'vue-router'
-import { ref }  from 'vue'
+import { useRouter, useRoute } from 'vue-router'
+import { ref, onMounted }  from 'vue'
 import { fetchStream } from '../../utils/request.js'
 import { showToast } from 'vant'
 import ChatBubble from '../../components/ChatBubble.vue'
 
 const router = useRouter()
+const route = useRoute()
 const inputMessage = ref('')
 // 会话数据
 const messages = ref([])
@@ -123,6 +124,12 @@ const sendMessage = () => {
   // 进行流式请求
   fetchAiResponse(msg)
 }
+
+onMounted(() => {
+  if (route.query.scene === 'detail' && route.query.city) {
+    inputMessage.value = `我想去${route.query.city}，请给我制定一个旅行计划`
+  }
+})
 </script>
 
 <style lang="scss" scoped>

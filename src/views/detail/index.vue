@@ -18,7 +18,7 @@
       <template v-else-if="tripData && tripData.success === true">
         <div class="card overview-card">
           <div class="trip-header">
-            <h2>{{ tripData.city }} . {{ tripData.days }}</h2>
+            <h2>{{ tripData.city }} · {{ tripData.days }}</h2>
             <span class="trip-budget">预算：{{ tripData.totalBudget }}元</span>
           </div>
         </div>
