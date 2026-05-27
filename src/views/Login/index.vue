@@ -50,10 +50,12 @@
 
 <script setup>
 import { reactive } from 'vue'
-import { showToast } from 'vant'
-import { useRouter } from 'vue-router'
+import { showToast, showFailToast  } from 'vant'
+import { useRoute, useRouter } from 'vue-router'
+import { post } from '@/utils/request'
 
 const router = useRouter()
+const route = useRoute()
 // 表单数据
 const form = reactive({
   username: '',
@@ -61,15 +63,27 @@ const form = reactive({
 })
 
 // 提交登录
-const goHome = () => { 
-  showToast({
-    message: '登陆成功',
-    position: 'top',
-  });
-  localStorage.setItem('username', form.username)
-  localStorage.setItem('password', form.password)
-  localStorage.setItem('isLogin', true)
-  router.push('/home')
+const goHome = async () => { 
+  try {
+    const res = await post('/login', {
+      username: form.username,
+      password: form.password
+    })
+    if (res.success) {
+      localStorage.setItem('AITRAVEL_TOKEN', res.token)
+      const redirectPath = route.query.redirect || '/home'
+      showToast({
+        message: res.message,
+        position: 'top',
+      });
+      router.push(redirectPath)
+    }
+  } catch (error) {
+    showFailToast({
+      message: `登录失败!`,
+      position: 'top',
+    });
+  }
 }
 
 </script>

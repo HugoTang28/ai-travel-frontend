@@ -14,28 +14,56 @@ const routes = [
     path: '/home',
     name: 'home',
     component: () => import('@/views/Home/index.vue'),
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: '/chat',
     name: 'chat',
     component: () => import('@/views/Chat/index.vue'),
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: '/user',
     name: 'user',
     component: () => import('@/views/User/index.vue'),
+    meta: {
+      requiresAuth: true,
+    },
   },
   {
     path: '/detail',
     name: 'detail',
     component: () => import('@/views/detail/index.vue'),
-  }
+    meta: {
+      requiresAuth: true,
+    },
+  },
 ]
 
-// 创建路由实例
 const router = createRouter({
-  history: createWebHistory(), // 使用History模式，URL不带#
-  routes, // 路由配置表
+  history: createWebHistory(),
+  routes,
+})
+
+router.beforeEach((to) => {
+  const token = localStorage.getItem('AITRAVEL_TOKEN')
+
+  if (to.meta.requiresAuth && !token) {
+    return {
+      path: '/login',
+      query: {
+        redirect: to.fullPath,
+      },
+    }
+  }
+
+  // if (to.path === '/login' && token) {
+  //   return '/home'
+  // }
 })
 
 export default router
