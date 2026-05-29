@@ -2,7 +2,7 @@ import axios from 'axios'
 
 // 创建axios实例
 const request = axios.create({
-  baseURL: 'http://localhost:3300/api/travel',
+  baseURL: '/api/travel',
   timeout: 1000000,
   headers: {'Content-Type': 'application/json;charset=UTF-8'},
 });
