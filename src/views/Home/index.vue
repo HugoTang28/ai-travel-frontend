@@ -16,14 +16,17 @@
           规划你的旅程
         </div>
         <van-field
-          is-link
-          readonly
           label="城市"
-          @click="showBottom = !showBottom"
-          v-model="formData.city" 
-          placeholder="请选择城市"
+          v-model="formData.city"
+          placeholder="输入城市名"
           class="city-field"
-        />
+          clearable
+        >
+          <template #right-icon>
+            <van-icon name="arrow-down" size="18" color="#999" @click="showBottom = true" />
+          </template>
+        </van-field>
+        <!-- 选择目的地 -->
         <van-popup
           v-model:show="showBottom"
           round
