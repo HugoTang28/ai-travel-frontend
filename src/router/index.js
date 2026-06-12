@@ -27,6 +27,14 @@ const routes = [
     },
   },
   {
+    path: '/contact',
+    name: 'contact',
+    component: () => import('@/views/contact/index.vue'),
+    meta: {
+      requiresAuth: true,
+    },
+  },
+  {
     path: '/chat',
     name: 'chat',
     component: () => import('@/views/Chat/index.vue'),
