@@ -4,7 +4,7 @@
     <van-tabbar v-if="['home','chat','user', 'hotCity', 'contact'].includes(route.name)" route v-model="active">
       <van-tabbar-item to="/home" name="home" icon="home-o">首页</van-tabbar-item>
       <van-tabbar-item to="/hotCity" name="hotCity" icon="location-o">热门城市</van-tabbar-item>
-      <van-tabbar-item to='/contact' icon="friends-o">联系人</van-tabbar-item>
+      <van-tabbar-item to="/contact" name="contact" icon="friends-o">联系人</van-tabbar-item>
       <van-tabbar-item to="/chat" name="chat" icon="chat-o">对话</van-tabbar-item>
       <van-tabbar-item to="/user" name="user" icon="user-o">我的</van-tabbar-item>
     </van-tabbar>
