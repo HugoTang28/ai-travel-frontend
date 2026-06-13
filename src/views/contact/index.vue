@@ -1,11 +1,11 @@
 <template>
   <div class="page-container contact-page">
     <section ref="messageContainer" class="chat-panel">
-      <div v-if="activeContact.messages.length === 0" class="chat-empty">
+      <!-- <div v-if="activeContact.messages.length === 0" class="chat-empty">
         <p class="chat-empty__tip">点击下方输入框开始聊天</p>
-      </div>
+      </div> -->
 
-      <template v-else>
+      <template v-if="activeContact.messages.length !== 0">
         <div class="chat-time">{{ activeContact.sessionLabel }}</div>
 
         <div
@@ -198,17 +198,20 @@ onMounted(() => {
 </script>
 
 <style lang="scss" scoped>
+.page-container {
+  background-color: #fff;
+}
 .contact-page {
-  min-height: calc(100vh - 50px);
-  padding: 0 0 168px !important;
-  background: #f5f5f5;
+  max-height: calc(100vh - 50px);
+  // padding: 0 0 168px !important;
+  // background: #f5f5f5;
 }
 
 .chat-panel {
-  min-height: calc(100vh - 218px);
+  max-height: calc(100vh - 218px);
   overflow-y: auto;
   padding: 14px 12px 24px;
-  background: #f5f5f5;
+  // background: #f5f5f5;
 }
 
 .chat-empty {
