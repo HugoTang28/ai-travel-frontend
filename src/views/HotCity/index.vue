@@ -6,65 +6,73 @@
     />
     <div class="nav-placeholder"></div>
     <div class="cityRecommend">
-      <div class="cityItem">
-        <div class="cityTitle">广州</div>
+      <div class="cityItem" v-for="item in cityItem" :key="item.id">
+        <div class="cityTitle">{{ item.cityName }}</div>
         <div class="imgItem">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-        </div>
-      </div>
-      <div class="cityItem">
-        <div class="cityTitle">广州</div>
-        <div class="imgItem">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-        </div>
-      </div>
-      <div class="cityItem">
-        <div class="cityTitle">广州</div>
-        <div class="imgItem">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-        </div>
-      </div>
-      <div class="cityItem">
-        <div class="cityTitle">广州</div>
-        <div class="imgItem">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-        </div>
-      </div>
-      <div class="cityItem">
-        <div class="cityTitle">广州</div>
-        <div class="imgItem">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-        </div>
-      </div>
-      <div class="cityItem">
-        <div class="cityTitle">广州</div>
-        <div class="imgItem">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-        </div>
-      </div>
-      <div class="cityItem">
-        <div class="cityTitle">广州</div>
-        <div class="imgItem">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-        </div>
-      </div>
-      <div class="cityItem">
-        <div class="cityTitle">广州</div>
-        <div class="imgItem">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
-          <img class="imgShow" src="https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png" alt="">
+          <img class="imgShow" :src="item.imgUrl" alt="">
+          <img class="imgShow" :src="item.imgUrl" alt="">
         </div>
       </div>
     </div>
   </div>
 </template>
+
+<script setup>
+import { ref } from 'vue'
+
+const cityItem = [
+  {
+    id: 1,
+    cityName: '广州',
+    imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
+  },
+  {
+    id: 2,
+    cityName: '广州',
+    imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
+  },
+  {
+    id: 3,
+    cityName: '广州',
+    imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
+  },
+  {
+    id: 4,
+    cityName: '广州',
+    imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
+  },
+  {
+    id: 5,
+    cityName: '广州',
+    imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
+  },
+  {
+    id: 6,
+    cityName: '广州',
+    imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
+  },
+  {
+    id: 7,
+    cityName: '广州',
+    imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
+  },
+  {
+    id: 8,
+    cityName: '广州',
+    imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
+  },
+  {
+    id: 9,
+    cityName: '广州',
+    imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
+  },
+  {
+    id: 10,
+    cityName: '广州',
+    imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
+  },
+]
+</script>
 
 <style lang="scss" scoped>
 .page-container {

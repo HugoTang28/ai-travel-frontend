@@ -39,7 +39,7 @@
           title="设置" 
           is-link 
           :icon="'settings'"
-          @click="showToast('功能开发中')"
+          @click="goSetting"
         />
       </van-cell-group>
     </div>
@@ -78,19 +78,24 @@
 
 <script setup>
 import { ref } from 'vue'
+import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import favicon from '../../assets/images/favicon.png'
 
 // 用户信息
 // const userAvatar = 'https://img.yzcdn.cn/vant/cat.jpeg'
 const userName = '游客'
-
+const router = useRouter()
 // 对话框状态
 const aboutDialogVisible = ref(false)
 
 // 显示关于我们对话框
 const showAboutDialog = () => {
   aboutDialogVisible.value = true
+}
+
+const goSetting = () => {
+  router.push('/setting')
 }
 </script>
 
