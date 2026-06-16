@@ -8,8 +8,25 @@
         left-text="返回"
         @click-left="router.back()"
       >
+        <template #right>
+          <van-icon @click="openConversationList" name="clock-o" size="21" />
+        </template>
       </van-nav-bar>
     </div>
+    <van-popup
+      v-model:show="conversationListShow"
+      position="right"
+      :style="{ width: '50%', height: '100%' }"
+    >
+      <div class="conversation">
+        <div class="conversationTitle">对话列表</div>
+        <div class="conversationItem" v-for="item in conversations" :key="item.id">
+          <div class="msgTitle">{{ item.title }}</div>
+          <van-icon name="delete-o" size="20" />
+        </div>
+      </div>
+    </van-popup>
+    <!-- 主体聊天内容 -->
     <div class="chat-container">
       <div v-if="messages.length === 0" class="chat-empty">
         <van-empty
@@ -30,6 +47,7 @@
         </div>
       </div>
     </div>
+    <!-- 输入框 -->
     <div class="chat-input-area">
       <van-field
         v-model="inputMessage"
@@ -54,15 +72,18 @@
 
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
-import { ref, onMounted }  from 'vue'
+import { ref, onMounted, computed }  from 'vue'
 import { fetchStream } from '../../utils/request.js'
 import { showToast } from 'vant'
 import ChatBubble from '../../components/ChatBubble.vue'
+import { useChatStre } from '@/store/chat.js'
 
 const router = useRouter()
 const route = useRoute()
 const inputMessage = ref('')
-// 会话数据
+const conversationListShow = ref(false) // 对话列表弹出框
+const chatStore = useChatStre()
+// 对话数据
 const messages = ref([])
 const quickQuestions = [
   '北京有哪些必去的景点？',
@@ -123,6 +144,14 @@ const sendMessage = () => {
   inputMessage.value = ''
   // 进行流式请求
   fetchAiResponse(msg)
+}
+
+const conversations = computed(() => chatStore.conversations)
+console.log(conversations.value)
+
+// 打开对话列表弹框
+const openConversationList = () => {
+  conversationListShow.value = true
 }
 
 onMounted(() => {
@@ -207,4 +236,27 @@ onMounted(() => {
   border-radius: 20px;
   padding: 8px 16px;
 }
+
+.conversation {
+  padding: 5px 10px;
+  .conversationTitle {
+    font-size: 18px;
+    width: 100%;
+    text-align: center;
+    margin: 5px 0 10px 0;
+  }
+  .conversationItem {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 5px 10px;
+    border: 1px solid #bdb6b6;
+    border-radius: 8px;
+    .msgTitle {
+      font-size: 20px;
+      line-height: 1;
+    }
+  }
+}
+
 </style>
