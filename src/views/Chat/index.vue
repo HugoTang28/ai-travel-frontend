@@ -19,10 +19,18 @@
       :style="{ width: '50%', height: '100%' }"
     >
       <div class="conversation">
-        <div class="conversationTitle">对话列表</div>
-        <div class="conversationItem" v-for="item in conversations" :key="item.id">
+        <div class="addNewConversation" @click="debounceAddNewConversation">
+          <img class="newIcon" src="@/assets/images/new.png" alt="">
+          <span>新建对话</span>
+        </div>
+        <div class="historicalConversation">历史对话</div>
+        <div class="conversationItem" 
+          v-for="item in conversations"
+          :key="item.id"
+          @click="switchConversation(item.id)"
+        >
           <div class="msgTitle">{{ item.title }}</div>
-          <van-icon name="delete-o" size="20" />
+          <van-icon @click.stop="deleteConversations(item.id)" name="delete-o" size="20" />
         </div>
       </div>
     </van-popup>
@@ -53,7 +61,7 @@
         v-model="inputMessage"
         placeholder="请输入你的问题"
         :disabled="isStreaming"
-        @key.enter="sendMessage"
+        @keyup.enter="sendMessage"
       >
         <template #button>
           <van-button
@@ -72,11 +80,12 @@
 
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
-import { ref, onMounted, computed }  from 'vue'
-import { fetchStream } from '../../utils/request.js'
+import { ref, onMounted, computed, nextTick }  from 'vue'
+import { fetchStream } from '@/utils/request.js'
 import { showToast } from 'vant'
-import ChatBubble from '../../components/ChatBubble.vue'
+import ChatBubble from '@/components/ChatBubble.vue'
 import { useChatStre } from '@/store/chat.js'
+import { debounce } from '@/utils/common.js'
 
 const router = useRouter()
 const route = useRoute()
@@ -84,7 +93,7 @@ const inputMessage = ref('')
 const conversationListShow = ref(false) // 对话列表弹出框
 const chatStore = useChatStre()
 // 对话数据
-const messages = ref([])
+let messages = ref([])
 const quickQuestions = [
   '北京有哪些必去的景点？',
   '上海美食推荐',
@@ -107,6 +116,7 @@ const handleClick = (tag) => {
   inputMessage.value = tag
 }
 
+// 获取响应
 const fetchAiResponse = (userMsg) => {
   isStreaming.value = true
   messages.value.push({
@@ -124,6 +134,12 @@ const fetchAiResponse = (userMsg) => {
       lastMsg.content = fullResponse
     }
   }, () => {
+    // chatStore.addMessage({
+    //   id: Date.now(),
+    //   role: 'ai',
+    //   content: fullResponse,
+    //   timestamp: new Date().toISOString(),
+    // })
     isStreaming.value = false
   }, (errMsg) => {
     const lastMsg = messages.value[messages.value.length - 1]
@@ -135,26 +151,56 @@ const fetchAiResponse = (userMsg) => {
   })
 }
 
+// 发送
 const sendMessage = () => {
   const msg = inputMessage.value.trim()
   if (!msg || isStreaming.value) {
     return
   }
+  // chatStore.addMessage({
+  //   id: Date.now(),
+  //   role: 'user',
+  //   content: msg,
+  //   timestamp: new Date().toISOString(),
+  // })
   addUserMessage(msg)
   inputMessage.value = ''
   // 进行流式请求
   fetchAiResponse(msg)
 }
 
-const conversations = computed(() => chatStore.conversations)
+const conversations = chatStore.conversations
 console.log(conversations.value)
 
 // 打开对话列表弹框
 const openConversationList = () => {
   conversationListShow.value = true
 }
-
-onMounted(() => {
+// 新增一个对话
+const addNewConversation = () => {
+  chatStore.creatConversation()
+  conversationListShow.value = false
+}
+const debounceAddNewConversation = debounce(addNewConversation, 1000, true)
+// 删除对话
+const deleteConversations = async (id) => {
+  try {
+    chatStore.deleteConversation(id)
+  } catch (error) {
+    console.log("删除对话失败");
+  }
+}
+// 切换对话
+const switchConversation = (id) => {
+  try {
+    chatStore.switchConversation(id)
+    messages.value = chatStore.currentConversation.messages
+    conversationListShow.value = false
+  } catch (error) {
+    console.log('对话切换失败：', error);
+  }
+}
+onMounted(async () => {
   if (route.query.scene === 'detail' && route.query.city) {
     inputMessage.value = `我想去${route.query.city}，请给我制定一个旅行计划`
   }
@@ -237,13 +283,30 @@ onMounted(() => {
   padding: 8px 16px;
 }
 
+// 历史对话
 .conversation {
   padding: 5px 10px;
-  .conversationTitle {
-    font-size: 18px;
-    width: 100%;
-    text-align: center;
+  .addNewConversation {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding: 5px;
+    background-color: #efefef;
+    font-size: 20px;
     margin: 5px 0 10px 0;
+    border-radius: 8px;
+    .newIcon {
+      width: 20px;
+      height: 20px;
+      line-height: 20px;
+      padding-right: 5px;
+    }
+  }
+  .historicalConversation {
+    margin-top: 14px;
+    font-size: 15px;
+    color: #7c7c7c;
+    font-family: "宋体", serif;
   }
   .conversationItem {
     display: flex;
@@ -252,11 +315,14 @@ onMounted(() => {
     padding: 5px 10px;
     border: 1px solid #bdb6b6;
     border-radius: 8px;
+    margin-top: 8px;
     .msgTitle {
       font-size: 20px;
       line-height: 1;
     }
   }
+  // .conversationItem:hover {
+  //   background-color: #efefef;
+  // }
 }
-
 </style>

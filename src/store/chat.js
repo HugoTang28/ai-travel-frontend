@@ -1,5 +1,7 @@
 import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
+import { v4 as uuidv4 } from 'uuid';
+
 export const useChatStre = defineStore('chat', () => {
   // 所有对话列表
   const conversations = ref([
@@ -8,51 +10,82 @@ export const useChatStre = defineStore('chat', () => {
       title: '新对话',
       messages: [], // 消息列表
       createdAt: Date.now(),
+    },
+    {
+      id: '2',
+      title: '测试对话',
+      messages: [
+        {
+          id: Date.now(),
+          role: 'user',
+          content: '你好，这是测试消息',
+          timestamp: new Date().toISOString(),
+        },
+        {
+          id: Date.now(),
+          role: 'ai',
+          content: '这是测试消息的回复',
+          timestamp: new Date().toISOString(),
+        }
+      ]
     }
   ])
 
   // 当前选中的对话id
-  const currentConversationsId = ref('1') 
+  const currentConversationId = ref('1') 
 
   // 当前对话
-  const currentConversations = computed(() => {
-    return conversations.value.find(item => item.id === currentConversationsId.value)
+  const currentConversation = computed(() => {
+    return conversations.value.find(item => item.id === currentConversationId.value)
   })
 
   // 当前对话的message
   const currentMesages = computed(() => {
-    return currentConversations.value.messages || []
+    return currentConversation.value.messages || []
   })
 
   // 创建新对话
-  const creatConversations = () => {
+  const creatConversation = () => {
     const newConversations = {
-      id: Date.now().toString,
+      id: uuidv4(),
       title: '新对话',
       messages: [],
       createdAt: Date.now(),
     }
     conversations.value.push(newConversations)
-    currentConversationsId.value = newConversations.id
+    currentConversationId.value = newConversations.id
   }
 
   // 切换对话
-  const switchConversations = (id) => {
-    currentConversationsId.value = id
+  const switchConversation = (id) => {
+    currentConversationId.value = id
   }
 
   // 添加消息到当前对话
   const addMessage = (message) => {
-    
+    // conversations.value.push(message)
+  }
+
+  // 删除对话
+  const deleteConversation = (id) => {
+    const arr = conversations.value
+    // 匹配id的元素下标
+    const targetIndex = arr.findIndex(item => item.id === id)
+    // 找到才删除，避免-1报错
+    if (targetIndex !== -1) {
+      // splice(起始下标, 删除个数) 直接修改原数组
+      arr.splice(targetIndex, 1)
+    }
   }
 
   return {
     conversations,
-    currentConversationsId,
-    currentConversations,
+    currentConversationId,
+    currentConversation,
     currentMesages,
-    creatConversations,
-    switchConversations,
-    
+    creatConversation,
+    switchConversation,
+    deleteConversation,
+    addMessage,
   }
-})
+}, { persist: true })
