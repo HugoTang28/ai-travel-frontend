@@ -83,8 +83,8 @@ import { useRouter, useRoute } from 'vue-router'
 import { ref, onMounted, computed, nextTick }  from 'vue'
 import { fetchStream } from '@/utils/request.js'
 import { showToast } from 'vant'
-import ChatBubble from '@/components/ChatBubble.vue'
-import { useChatStre } from '@/store/chat.js'
+import ChatBubble from '@/components/chat/ChatBubble.vue'
+import { useChatStre } from '@/store/index.js'
 import { debounce } from '@/utils/common.js'
 
 const router = useRouter()
@@ -134,12 +134,11 @@ const fetchAiResponse = (userMsg) => {
       lastMsg.content = fullResponse
     }
   }, () => {
-    // chatStore.addMessage({
-    //   id: Date.now(),
-    //   role: 'ai',
-    //   content: fullResponse,
-    //   timestamp: new Date().toISOString(),
-    // })
+    chatStore.addMessage({
+      role: 'ai',
+      content: fullResponse,
+      timestamp: new Date().toISOString(),
+    })
     isStreaming.value = false
   }, (errMsg) => {
     const lastMsg = messages.value[messages.value.length - 1]
@@ -157,12 +156,14 @@ const sendMessage = () => {
   if (!msg || isStreaming.value) {
     return
   }
-  // chatStore.addMessage({
-  //   id: Date.now(),
-  //   role: 'user',
-  //   content: msg,
-  //   timestamp: new Date().toISOString(),
-  // })
+  if(messages.length !== 0) {
+    chatStore.creatConversation()
+  }
+  chatStore.addMessage({
+    role: 'user',
+    content: msg,
+    timestamp: new Date().toISOString(),
+  })
   addUserMessage(msg)
   inputMessage.value = ''
   // 进行流式请求
@@ -179,6 +180,7 @@ const openConversationList = () => {
 // 新增一个对话
 const addNewConversation = () => {
   chatStore.creatConversation()
+  messages.value = [] // 新建对话后，清空页面消息显示
   conversationListShow.value = false
 }
 const debounceAddNewConversation = debounce(addNewConversation, 1000, true)

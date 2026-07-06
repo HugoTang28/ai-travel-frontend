@@ -80,9 +80,9 @@
 <script setup>
 import { reactive, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { post } from '../../utils/request.js'
-import SpotItem from '../../components/SpotItem.vue'
-import BudgetTable from '../../components/BudgetTable.vue'
+import { post } from '@/utils/request.js'
+import SpotItem from '@/components/detail/SpotItem.vue'
+import BudgetTable from '@/components/detail/BudgetTable.vue'
 
 const isLoading = ref(false)
 const formData = reactive({

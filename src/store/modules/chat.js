@@ -38,7 +38,7 @@ export const useChatStre = defineStore('chat', () => {
   const currentConversation = computed(() => {
     return conversations.value.find(item => item.id === currentConversationId.value)
   })
-
+ 
   // 当前对话的message
   const currentMesages = computed(() => {
     return currentConversation.value.messages || []
@@ -63,8 +63,13 @@ export const useChatStre = defineStore('chat', () => {
 
   // 添加消息到当前对话
   const addMessage = (message) => {
-    // conversations.value.push(message)
+    const conversation = conversations.value.find(
+      item => item.id === currentConversationId.value
+    )
+    if (!conversation) return
+    conversation.messages.push(message)
   }
+
 
   // 删除对话
   const deleteConversation = (id) => {
