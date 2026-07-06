@@ -9,7 +9,7 @@ import piniaPluginPersistedstate from 'pinia-plugin-persistedstate'
 import { createPinia } from 'pinia'
 
 // Locale.use('en-US', enUS) // 设置 Vant 语言为英文
-
+console.log(import.meta.env.VITE_API_BASE_URL)
 const app = createApp(App)
 const pinia = createPinia()
 pinia.use(piniaPluginPersistedstate)

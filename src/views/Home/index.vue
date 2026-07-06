@@ -20,40 +20,44 @@
           v-model="formData.city"
           placeholder="输入城市名"
           class="city-field"
+          @input="debkeywordChange"
+          autocomplete="off"
           clearable
         >
-          <template #right-icon>
-            <van-icon name="arrow-down" size="18" color="#999" @click="showBottom = true" />
-          </template>
         </van-field>
-        <!-- 选择目的地 -->
-        <van-popup
-          v-model:show="showBottom"
-          round
-          position="bottom"
+        <!-- 城市搜索建议下拉 -->
+        <div
+          ref="suggestRef"
+          class="suggest-list" 
+          v-if="isMenu && searchCityList.length > 0"
         >
-          <van-picker
-            show-toolbar
-            title="选择目的地"
-            :columns="cityList"
-            @confirm="onCityConfirm"
-            @cancel="showBottom = false"
-          />
-        </van-popup>
-        <van-field 
+          <div
+            class="suggest-item"
+            v-for="item in searchCityList"
+            :key="item.value"
+            @click.stop="onSuggestClick(item)"
+          >
+            {{ item.text }}
+          </div>
+        </div>
+        <!-- 预算 -->
+        <van-field  
           v-model="formData.budget" 
           label="预算"
           type="number"
-          placeholder="请输入预算">
+          autocomplete="off"
           :border="false"
           class="city-field"
+          placeholder="请输入预算">
         </van-field>
-
+        <!-- 天数 -->
         <van-field 
           v-model="formData.days" 
           label="天数"
           type="digit"
           placeholder="请输天数"
+          autocomplete="off"
+          class="city-field"
         >
           天数
         </van-field>
@@ -92,9 +96,11 @@
   </div>
 </template>
 <script setup>
-import { reactive, ref } from 'vue';
+import { nextTick, reactive, ref, watch, onMounted, onBeforeUnmount } from 'vue';
 import { useRouter } from 'vue-router';
 import { showToast } from 'vant';
+import { debounce } from '@/utils/common.js';
+import { post } from '@/utils/request.js'
 
 const router = useRouter();
 const loading = ref(false);
@@ -105,27 +111,12 @@ const formData = reactive({
   days: null,
 });
 
-const allCityList = [
+const popularCity = [
   '北京', '上海', '广州', '深圳', '成都', '杭州', '西安', '重庆',
-  '南京', '武汉', '苏州', '长沙', '天津', '郑州', '济南', '青岛',
-  '大连', '沈阳', '哈尔滨', '长春', '福州', '厦门', '南昌', '合肥',
-  '昆明', '贵阳', '南宁', '桂林', '海口', '三亚', '丽江', '大理',
-  '西安', '兰州', '乌鲁木齐', '拉萨', '呼和浩特', '太原', '石家庄'
+  '南京', '武汉', '苏州', '长沙'
 ]
-const popularCity = allCityList.slice(0, 12);
 const selectCity = (city) => {
   formData.city = city;
-  showBottom.value = false;
-}
-const cityList = allCityList.map( item => (
-  {
-    text: item,
-    value: item,
-  }
-))
-const onCityConfirm = ({ selectedValues }) => {
-  console.log(selectedValues);
-  formData.city = selectedValues[0];
   showBottom.value = false;
 }
 
@@ -172,9 +163,54 @@ const handleSubmit = () => {
       days: formData.days
     }
   })
+} 
+
+const suggestRef = ref(null)
+const isMenu = ref(false)
+const selectedValues = ref(null)
+const searchCityList = ref([])
+// 模糊搜索
+const keywordChange = async (keyword) => {
+  const city = formData.city.trim()
+  if (!city) {
+    searchCityList.value = []
+    isMenu.value = false
+    return
+  }
+  try {
+    const data = await post('/searchCity', { keyword: city })
+    const list = data?.data || []
+    searchCityList.value = list.map(item => ({
+      text: item.cityName,
+      value: item.id
+    }))
+    isMenu.value = searchCityList.value.length > 0
+  } catch (e) {
+    console.error('搜索城市失败', e)
+    searchCityList.value = []
+    isMenu.value = false
+  }
+}
+const debkeywordChange = debounce(keywordChange, 1500, false)
+const onSuggestClick = (item) => { // click ciytItem
+  formData.city = item.text
+  isMenu.value = false
 }
 
+const handleSuggestPopupOutsideClick = (event) => {
+  const wrapper = suggestRef.value
+  if (wrapper && !wrapper.contains(event.target)) {
+    isMenu.value = false
+  }
+}
+onMounted(() => {
+  document.addEventListener('click', handleSuggestPopupOutsideClick)
+})
+onBeforeUnmount(() => {
+  document.removeEventListener('click', handleSuggestPopupOutsideClick)
+})
 </script>
+
 <style lang="scss" scoped>
 .search-card {
   margin: 16px 0;
@@ -199,4 +235,23 @@ const handleSubmit = () => {
   font-size: 14px;
   transition: all 0.3s;
 }
+.suggest-list {
+  background: #fff;
+  border: 1px solid #ebedf0;
+  border-radius: 8px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  max-height: 200px;
+  overflow-y: auto;
+  margin-bottom: 12px;
+  .suggest-item {
+    padding: 10px 16px;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    &:active {
+      background-color: #f2f3f5;
+    }
+  }
+}
+
 </style>

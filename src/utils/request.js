@@ -10,10 +10,10 @@ const request = axios.create({
 // 请求拦截器
 request.interceptors.request.use(
   config => {
-  // // 添加token
-  // if (localStorage.getItem('token')) {
-  //   config.headers.Authorization = localStorage.getItem('token')
-  // }
+    const token = localStorage.getItem('AITRAVEL_TOKEN')
+    if (token) {
+      config.headers.Authorization = token
+    }
     return config
   }, error => {
     return Promise.reject(error)
@@ -39,11 +39,16 @@ export async function fetchStream(url, data, onChunk, onComplete, onError) {
   // 创建一个请求控制器
   const controller = new AbortController()
   try {
-    const response = await fetch(`http://localhost:3300/api/travel/${url}`, {
-    method: 'post',
-    headers: {
+    const headers = {
       'Content-Type': 'application/json'
-    },
+    }
+    const token = localStorage.getItem('AITRAVEL_TOKEN')
+    if (token) {
+      headers['Authorization'] = `Bearer ${token}`
+    }
+    const response = await fetch(`${request.defaults.baseURL}/${url}`, {
+    method: 'post',
+    headers,
     body: JSON.stringify(data),
     signal: controller.signal
   })

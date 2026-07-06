@@ -1,25 +1,25 @@
-import { defineConfig } from 'vite'
+import { defineConfig, loadEnv } from 'vite'
 import vue from '@vitejs/plugin-vue'
 import path from 'path'
 
-// https://vite.dev/config/
-export default defineConfig({
-  plugins: [vue()],
-  server: {
-    proxy: {
-      '/api/auth': {
-        target: 'http://localhost:8080',
-        changeOrigin: true,
-      },
-      '/api/travel': {
-        target: 'http://localhost:3300',
-        changeOrigin: true,
+export default defineConfig(({ mode }) => {
+  // 加载对应环境变量
+  const env = loadEnv(mode, process.cwd())
+
+  return {  
+    plugins: [vue()],
+    server: {
+      proxy: {
+        '/api/travel': {
+          target: env.VITE_API_BASE_URL,
+          changeOrigin: true,
+        },
       },
     },
-  },
-  resolve: {
-    alias: {
-      '@': path.resolve(__dirname, 'src'), // 配置 @ 别名指向 src目录
+    resolve: {
+      alias: {
+        '@': path.resolve(__dirname, 'src'),
+      },
     },
-  },
+  }
 })
