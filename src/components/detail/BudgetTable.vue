@@ -1,14 +1,14 @@
 <template>
   <div class="budget-table">
-    <van-cell-group :border="false">
-      <van-cell
+    <VanCellGroup :border="false">
+      <VanCell
         v-for="(value, key) in budgetItems"
         :key="key"
         :title="getLabel(key)"
         :value="`¥${value}`"
         :border="false"
       />
-    </van-cell-group>
+    </VanCellGroup>
     <div class="budget-total">
       <span>总计</span>
       <span class="total-amount">¥{{ total }}</span>

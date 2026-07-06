@@ -1,7 +1,7 @@
 <template>
   <div class="page-container chat-page">
     <div class="page-header">
-      <van-nav-bar
+      <VanNavBar
         title="AI智能助手"
         left-arrow
         fixed
@@ -9,69 +9,87 @@
         @click-left="router.back()"
       >
         <template #right>
-          <van-icon @click="openConversationList" name="clock-o" size="21" />
+          <VanIcon
+            name="clock-o"
+            size="21"
+            @click="openConversationList"
+          />
         </template>
-      </van-nav-bar>
+      </VanNavBar>
     </div>
-    <sideBar
+    <SideBar
       v-model:show="conversationListShow"
       :messages="messages"
-    ></sideBar>
+    ></SideBar>
 
     <!-- 主体聊天内容 -->
     <div class="chat-container">
-      <div v-if="messages.length === 0" class="chat-empty">
-        <van-empty
-          description="开始和AI助手对话吧"
-        ></van-empty>
+      <div
+        v-if="messages.length === 0"
+        class="chat-empty"
+      >
+        <VanEmpty description="开始和AI助手对话吧"></VanEmpty>
         <div class="quick-questions">
           <div class="quick-title">常见问题</div>
-          <van-tag 
-            @click="selectTag(tag)" 
-            v-for="tag in quickQuestions" 
-            :key="tag" 
-            size="large" 
-            mark 
+          <VanTag
+            v-for="tag in quickQuestions"
+            :key="tag"
+            size="large"
+            mark
             class="quick-tag"
+            @click="selectTag(tag)"
           >
             {{ tag }}
-          </van-tag>
+          </VanTag>
         </div>
       </div>
-      <div v-else class="message-list">
-        <ChatBubble v-for="msg in messages" :key="msg.id" :message="msg"></ChatBubble>
-        <div class="streaming-indicator" v-if="isStreaming">
-          <van-loading type="spinner" size="20px"></van-loading>
+      <div
+        v-else
+        class="message-list"
+      >
+        <ChatBubble
+          v-for="msg in messages"
+          :key="msg.id"
+          :message="msg"
+        ></ChatBubble>
+        <div
+          v-if="isStreaming"
+          class="streaming-indicator"
+        >
+          <VanLoading
+            type="spinner"
+            size="20px"
+          ></VanLoading>
           <span>AI正在思考中...</span>
         </div>
       </div>
     </div>
     <!-- 输入框 -->
     <div class="chat-input-area">
-      <van-field
+      <VanField
         v-model="inputMessage"
         placeholder="请输入你的问题"
         :disabled="isStreaming"
         @keyup.enter="sendMessage"
       >
         <template #button>
-          <van-button
-            @click="sendMessage"
+          <VanButton
             type="primary"
             size="small"
             :disabled="isStreaming"
+            @click="sendMessage"
           >
             发送
-          </van-button>
+          </VanButton>
         </template>
-      </van-field>
+      </VanField>
     </div>
   </div>
 </template>
 
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
-import { ref, onMounted, computed, nextTick }  from 'vue'
+import { ref, onMounted, computed, nextTick } from 'vue'
 import { fetchStream } from '@/utils/request.js'
 import { showToast } from 'vant'
 import ChatBubble from '@/components/chat/ChatBubble.vue'
@@ -85,7 +103,7 @@ const conversationListShow = ref(false)
 
 const chatStore = useChatStore()
 // 对话数据
-let messages = ref([])
+const messages = ref([])
 const quickQuestions = [
   '北京有哪些必去的景点？',
   '上海美食推荐',
@@ -98,7 +116,7 @@ const addUserMessage = (content) => {
     id: Date.now(),
     role: 'user',
     content,
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   })
 }
 
@@ -115,31 +133,37 @@ const fetchAiResponse = (userMsg) => {
     id: Date.now() + 1,
     role: 'ai',
     content: '',
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   })
   let fullResponse = ''
 
-  fetchStream('chat', {message: userMsg}, (chunk) => {
-    fullResponse += chunk
-    const lastMsg = messages.value[messages.value.length - 1]
-    if (lastMsg && lastMsg.role === 'ai') {
-      lastMsg.content = fullResponse
+  fetchStream(
+    'chat',
+    { message: userMsg },
+    (chunk) => {
+      fullResponse += chunk
+      const lastMsg = messages.value[messages.value.length - 1]
+      if (lastMsg && lastMsg.role === 'ai') {
+        lastMsg.content = fullResponse
+      }
+    },
+    () => {
+      chatStore.addMessage({
+        role: 'ai',
+        content: fullResponse,
+        timestamp: new Date().toISOString()
+      })
+      isStreaming.value = false
+    },
+    (errMsg) => {
+      const lastMsg = messages.value[messages.value.length - 1]
+      if (lastMsg && lastMsg.role === 'ai') {
+        lastMsg.content = `抱歉，AI发生了错误${errMsg}`
+      }
+      isStreaming.value = false
+      showToast('AI回复失败！')
     }
-  }, () => {
-    chatStore.addMessage({
-      role: 'ai',
-      content: fullResponse,
-      timestamp: new Date().toISOString(),
-    })
-    isStreaming.value = false
-  }, (errMsg) => {
-    const lastMsg = messages.value[messages.value.length - 1]
-    if (lastMsg && lastMsg.role === 'ai') {
-      lastMsg.content = `抱歉，AI发生了错误${errMsg}`
-    }
-    isStreaming.value = false
-    showToast('AI回复失败！')
-  })
+  )
 }
 
 // 发送
@@ -148,20 +172,19 @@ const sendMessage = () => {
   if (!msg || isStreaming.value) {
     return
   }
-  if(messages.length !== 0) {
+  if (messages.value.length !== 0) {
     chatStore.creatConversation()
   }
   chatStore.addMessage({
     role: 'user',
     content: msg,
-    timestamp: new Date().toISOString(),
+    timestamp: new Date().toISOString()
   })
   addUserMessage(msg)
   inputMessage.value = ''
   // 进行流式请求
   fetchAiResponse(msg)
 }
-
 
 // 打开对话列表弹框
 const openConversationList = () => {
@@ -179,6 +202,7 @@ onMounted(async () => {
 .page-header {
   height: 46px;
 }
+
 .chat-page {
   display: flex;
   flex-direction: column;

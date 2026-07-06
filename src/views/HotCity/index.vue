@@ -1,16 +1,28 @@
 <template>
   <div class="page-container">
-    <van-nav-bar
+    <VanNavBar
       title="热门城市推荐"
       fixed
     />
     <div class="nav-placeholder"></div>
     <div class="cityRecommend">
-      <div class="cityItem" v-for="item in cityItem" :key="item.id">
+      <div
+        v-for="item in cityItem"
+        :key="item.id"
+        class="cityItem"
+      >
         <div class="cityTitle">{{ item.cityName }}</div>
         <div class="imgItem">
-          <img class="imgShow" :src="item.imgUrl" alt="">
-          <img class="imgShow" :src="item.imgUrl" alt="">
+          <img
+            class="imgShow"
+            :src="item.imgUrl"
+            alt=""
+          />
+          <img
+            class="imgShow"
+            :src="item.imgUrl"
+            alt=""
+          />
         </div>
       </div>
     </div>
@@ -70,7 +82,7 @@ const cityItem = [
     id: 10,
     cityName: '广州',
     imgUrl: 'https://nfassetoss.southcn.com/__asset/7bc7295f9d/f1a8aebe8b.png'
-  },
+  }
 ]
 </script>
 
@@ -110,7 +122,6 @@ const cityItem = [
           border-radius: 8px;
         }
       }
-  
     }
   }
 }

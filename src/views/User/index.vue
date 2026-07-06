@@ -1,16 +1,16 @@
 <template>
   <div class="profile-container">
-    <van-nav-bar 
-      title="我的" 
-      left-text="" 
+    <VanNavBar
+      title="我的"
+      left-text=""
       :left-arrow="false"
     />
-    
+
     <!-- 用户信息区域 -->
     <div class="user-info">
-      <van-image 
-        :src="favicon" 
-        round 
+      <VanImage
+        :src="favicon"
+        round
         class="avatar"
       />
       <div class="user-details">
@@ -18,51 +18,51 @@
         <p class="user-desc">欢迎使用智能旅游助手</p>
       </div>
     </div>
-    
+
     <!-- 功能菜单 -->
     <div class="menu-section">
       <h3 class="menu-title">我的服务</h3>
-      <van-cell-group>
-        <van-cell 
-          title="我的收藏" 
-          is-link 
+      <VanCellGroup>
+        <VanCell
+          title="我的收藏"
+          is-link
           :icon="'star-o'"
           @click="showToast('功能开发中')"
         />
-        <van-cell 
-          title="历史记录" 
-          is-link 
+        <VanCell
+          title="历史记录"
+          is-link
           :icon="'history'"
           @click="showToast('功能开发中')"
         />
-        <van-cell 
-          title="设置" 
-          is-link 
+        <VanCell
+          title="设置"
+          is-link
           :icon="'settings'"
           @click="goSetting"
         />
-      </van-cell-group>
+      </VanCellGroup>
     </div>
-    
+
     <!-- 关于我们 -->
     <div class="menu-section">
       <h3 class="menu-title">关于</h3>
-      <van-cell-group>
-        <van-cell 
-          title="关于我们" 
-          is-link 
+      <VanCellGroup>
+        <VanCell
+          title="关于我们"
+          is-link
           @click="showAboutDialog"
         />
-        <van-cell 
-          title="版本信息" 
+        <VanCell
+          title="版本信息"
           value="v1.0.0"
         />
-      </van-cell-group>
+      </VanCellGroup>
     </div>
-    
+
     <!-- 关于我们对话框 -->
-    <van-dialog 
-      v-model:show="aboutDialogVisible" 
+    <VanDialog
+      v-model:show="aboutDialogVisible"
       title="关于我们"
       show-cancel-button
     >
@@ -72,7 +72,7 @@
         <p class="mt-2">为您提供个性化的旅游行程推荐和实时旅游咨询服务</p>
         <p class="mt-4 text-center">© 2026 智能旅游助手</p>
       </div>
-    </van-dialog>
+    </VanDialog>
   </div>
 </template>
 

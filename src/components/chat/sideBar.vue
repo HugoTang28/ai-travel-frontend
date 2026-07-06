@@ -1,25 +1,37 @@
 <template>
-  <van-popup
+  <VanPopup
     v-model:show="show"
     position="right"
     :style="{ width: '50%', height: '100%' }"
   >
     <div class="conversation">
-      <div class="addNewConversation" @click="debounceAddNewConversation">
-        <img class="newIcon" src="@/assets/images/new.png" alt="">
+      <div
+        class="addNewConversation"
+        @click="debounceAddNewConversation"
+      >
+        <img
+          class="newIcon"
+          src="@/assets/images/new.png"
+          alt=""
+        />
         <span>新建对话</span>
       </div>
       <div class="historicalConversation">历史对话</div>
-      <div class="conversationItem" 
+      <div
         v-for="item in conversations"
         :key="item.id"
+        class="conversationItem"
         @click="switchConversation(item.id)"
       >
         <div class="msgTitle">{{ item.title }}</div>
-        <van-icon @click.stop="deleteConversations(item.id)" name="delete-o" size="20" />
+        <VanIcon
+          name="delete-o"
+          size="20"
+          @click.stop="deleteConversations(item.id)"
+        />
       </div>
     </div>
-  </van-popup>
+  </VanPopup>
 </template>
 
 <script setup>
@@ -38,7 +50,7 @@ const deleteConversations = async (id) => {
   try {
     chatStore.deleteConversation(id)
   } catch (error) {
-    console.log("删除对话失败");
+    console.log('删除对话失败')
   }
 }
 
@@ -57,7 +69,7 @@ const switchConversation = (id) => {
     emit('messages', chatStore.currentConversation.messages)
     emit('update:show', false)
   } catch (error) {
-    console.log('对话切换失败：', error);
+    console.log('对话切换失败：', error)
   }
 }
 </script>
@@ -66,6 +78,7 @@ const switchConversation = (id) => {
 // 历史对话
 .conversation {
   padding: 5px 10px;
+
   .addNewConversation {
     display: flex;
     justify-content: center;
@@ -75,6 +88,7 @@ const switchConversation = (id) => {
     font-size: 20px;
     margin: 5px 0 10px 0;
     border-radius: 8px;
+
     .newIcon {
       width: 20px;
       height: 20px;
@@ -82,12 +96,14 @@ const switchConversation = (id) => {
       padding-right: 5px;
     }
   }
+
   .historicalConversation {
     margin-top: 14px;
     font-size: 15px;
     color: #7c7c7c;
-    font-family: "宋体", serif;
+    font-family: '宋体', serif;
   }
+
   .conversationItem {
     display: flex;
     justify-content: space-between;
@@ -96,11 +112,13 @@ const switchConversation = (id) => {
     border: 1px solid #bdb6b6;
     border-radius: 8px;
     margin-top: 8px;
+
     .msgTitle {
       font-size: 20px;
       line-height: 1;
     }
   }
+
   // .conversationItem:hover {
   //   background-color: #efefef;
   // }

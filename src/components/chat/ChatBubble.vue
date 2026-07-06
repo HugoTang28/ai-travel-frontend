@@ -1,12 +1,28 @@
 <template>
-  <div class="chat-bubble" :class="messageClass">
+  <div
+    class="chat-bubble"
+    :class="messageClass"
+  >
     <div class="bubble-content">
-      <div class="message-text" v-if="message.role === 'user'">{{ message.content }}</div>
-      <div class="message-text ai-message" v-else>
+      <div
+        v-if="message.role === 'user'"
+        class="message-text"
+      >
+        {{ message.content }}
+      </div>
+      <div
+        v-else
+        class="message-text ai-message"
+      >
         <template v-if="message.content">{{ message.content }}</template>
       </div>
     </div>
-    <div class="message-time" v-if="showTime">{{ formatTime }}</div>
+    <div
+      v-if="showTime"
+      class="message-time"
+    >
+      {{ formatTime }}
+    </div>
   </div>
 </template>
 

@@ -1,6 +1,9 @@
 <template>
   <div class="page-container contact-page">
-    <section ref="messageContainer" class="chat-panel">
+    <section
+      ref="messageContainer"
+      class="chat-panel"
+    >
       <!-- <div v-if="activeContact.messages.length === 0" class="chat-empty">
         <p class="chat-empty__tip">点击下方输入框开始聊天</p>
       </div> -->
@@ -14,7 +17,7 @@
           class="message-row"
           :class="{
             'message-row--self': message.sender === 'me',
-            'message-row--contact': message.sender === 'contact',
+            'message-row--contact': message.sender === 'contact'
           }"
         >
           <div
@@ -29,14 +32,23 @@
             {{ message.content }}
           </div>
 
-          <div v-if="message.sender === 'me'" class="message-avatar message-avatar--self">
+          <div
+            v-if="message.sender === 'me'"
+            class="message-avatar message-avatar--self"
+          >
             我
           </div>
         </div>
       </template>
 
-      <div v-if="activeContact.pendingReplies > 0" class="message-row message-row--contact">
-        <div class="message-avatar" :style="{ backgroundColor: activeContact.avatarColor }">
+      <div
+        v-if="activeContact.pendingReplies > 0"
+        class="message-row message-row--contact"
+      >
+        <div
+          class="message-avatar"
+          :style="{ backgroundColor: activeContact.avatarColor }"
+        >
           {{ activeContact.avatarText }}
         </div>
         <div class="typing-bubble">
@@ -58,14 +70,26 @@
 
         <div class="composer-toolbar">
           <div class="composer-tools">
-            <button type="button" class="tool-btn" aria-label="emoji">
-              <van-icon name="smile-o" />
+            <button
+              type="button"
+              class="tool-btn"
+              aria-label="emoji"
+            >
+              <VanIcon name="smile-o" />
             </button>
-            <button type="button" class="tool-btn" aria-label="chat">
-              <van-icon name="chat-o" />
+            <button
+              type="button"
+              class="tool-btn"
+              aria-label="chat"
+            >
+              <VanIcon name="chat-o" />
             </button>
-            <button type="button" class="tool-btn" aria-label="add">
-              <van-icon name="add-o" />
+            <button
+              type="button"
+              class="tool-btn"
+              aria-label="add"
+            >
+              <VanIcon name="add-o" />
             </button>
           </div>
 
@@ -101,7 +125,7 @@ const formatSessionLabel = (date = new Date()) => {
 const createMessage = (sender, content) => ({
   id: `${sender}-${Date.now()}-${Math.random().toString(16).slice(2)}`,
   sender,
-  content,
+  content
 })
 
 const contacts = ref([
@@ -113,7 +137,7 @@ const contacts = ref([
     autoReply: '收到，我先记下这条消息，后面按这个继续聊。',
     pendingReplies: 0,
     sessionLabel: '',
-    messages: [],
+    messages: []
   },
   {
     id: 'azhe',
@@ -123,7 +147,7 @@ const contacts = ref([
     autoReply: '看到了，这边先按预设消息回你，后续再接真实接口。',
     pendingReplies: 0,
     sessionLabel: '',
-    messages: [],
+    messages: []
   },
   {
     id: 'mia',
@@ -133,8 +157,8 @@ const contacts = ref([
     autoReply: '好的，这条先用固定回复占位，页面效果已经能跑通。',
     pendingReplies: 0,
     sessionLabel: '',
-    messages: [],
-  },
+    messages: []
+  }
 ])
 
 const activeContactId = ref(contacts.value[0].id)
@@ -201,6 +225,7 @@ onMounted(() => {
 .page-container {
   background-color: #fff;
 }
+
 .contact-page {
   max-height: calc(100vh - 50px);
   // padding: 0 0 168px !important;

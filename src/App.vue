@@ -1,13 +1,32 @@
 <template>
-  <div id="app"> 
-    <router-view />
-    <van-tabbar v-if="['home','chat','user', 'hotCity', 'contact'].includes(route.name)" route v-model="active">
-      <van-tabbar-item to="/home" name="home" icon="home-o">首页</van-tabbar-item>
+  <div id="app">
+    <RouterView />
+    <VanTabbar
+      v-if="['home', 'chat', 'user', 'hotCity', 'contact'].includes(route.name)"
+      v-model="active"
+      route
+    >
+      <VanTabbarItem
+        to="/home"
+        name="home"
+        icon="home-o"
+        >首页</VanTabbarItem
+      >
       <!-- <van-tabbar-item to="/hotCity" name="hotCity" icon="location-o">热门城市</van-tabbar-item>
       <van-tabbar-item to="/contact" name="contact" icon="friends-o">联系人</van-tabbar-item> -->
-      <van-tabbar-item to="/chat" name="chat" icon="chat-o">对话</van-tabbar-item>
-      <van-tabbar-item to="/user" name="user" icon="user-o">我的</van-tabbar-item>
-    </van-tabbar>
+      <VanTabbarItem
+        to="/chat"
+        name="chat"
+        icon="chat-o"
+        >对话</VanTabbarItem
+      >
+      <VanTabbarItem
+        to="/user"
+        name="user"
+        icon="user-o"
+        >我的</VanTabbarItem
+      >
+    </VanTabbar>
   </div>
 </template>
 
@@ -24,7 +43,7 @@ watch(
   () => route.path,
   (path) => {
     // 把 /home → home  /chat → chat
-    active.value = path.slice(1) 
+    active.value = path.slice(1)
   },
   { immediate: true }
 )

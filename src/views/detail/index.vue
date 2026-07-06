@@ -1,19 +1,35 @@
 <template>
   <div class="page-container">
     <div class="page-header">
-      <van-nav-bar fixed left-text="返回" left-arrow @click-left="goBack" :title="formData.city + '行程规划'">
-      </van-nav-bar>
+      <VanNavBar
+        fixed
+        left-text="返回"
+        left-arrow
+        :title="formData.city + '行程规划'"
+        @click-left="goBack"
+      >
+      </VanNavBar>
     </div>
     <div class="page-content">
-      <div v-if="isLoading" class="loading-container">
-        <van-loading type="spinner" size="30px">
+      <div
+        v-if="isLoading"
+        class="loading-container"
+      >
+        <VanLoading
+          type="spinner"
+          size="30px"
+        >
           正在生成旅游规划...
-        </van-loading>
+        </VanLoading>
       </div>
       <div v-else-if="errorMsg">
-        <van-empty description="errorMsg">
-          <van-button type="primary" @click="fetchData">重试</van-button>
-        </van-empty>
+        <VanEmpty description="errorMsg">
+          <VanButton
+            type="primary"
+            @click="fetchData"
+            >重试</VanButton
+          >
+        </VanEmpty>
       </div>
       <template v-else-if="tripData && tripData.success === true">
         <div class="card overview-card">
@@ -22,12 +38,15 @@
             <span class="trip-budget">预算：{{ tripData.totalBudget }}元</span>
           </div>
         </div>
-        <van-collapse v-model="activeDays" class="trip-collapse">
-          <van-collapse-item
-           v-for="day in tripData.dailyItinerary"
-           :key="day.day"
-           :title="'第'+ day.day +'天'"
-           :name="day.day"
+        <VanCollapse
+          v-model="activeDays"
+          class="trip-collapse"
+        >
+          <VanCollapseItem
+            v-for="day in tripData.dailyItinerary"
+            :key="day.day"
+            :title="'第' + day.day + '天'"
+            :name="day.day"
           >
             <div class="day-schedule">
               <div class="day-section">
@@ -43,36 +62,60 @@
                 <SpotItem :data="day.evening"></SpotItem>
               </div>
             </div>
-          </van-collapse-item>
-        </van-collapse>
-        <div class="card budget-card" v-if="tripData.budgetBreakdown">
-          <div class="section-title">
-            预算明细
-          </div>
-          <BudgetTable :data="tripData.budgetBreakdown" :total="tripData.totalBudget"></BudgetTable>
+          </VanCollapseItem>
+        </VanCollapse>
+        <div
+          v-if="tripData.budgetBreakdown"
+          class="card budget-card"
+        >
+          <div class="section-title">预算明细</div>
+          <BudgetTable
+            :data="tripData.budgetBreakdown"
+            :total="tripData.totalBudget"
+          ></BudgetTable>
         </div>
-        <div class="card tips-card" v-if="tripData.tips && tripData.tips.length">
-          <div class="section-title">
-            温馨提示
-          </div>
+        <div
+          v-if="tripData.tips && tripData.tips.length"
+          class="card tips-card"
+        >
+          <div class="section-title">温馨提示</div>
           <ul class="tips-list">
-            <li v-for="(tip, index) in tripData.tips" :key="index">{{ tip }}</li>
+            <li
+              v-for="(tip, index) in tripData.tips"
+              :key="index"
+            >
+              {{ tip }}
+            </li>
           </ul>
         </div>
-        <div class="card warnings-card" v-if="tripData.warnings && tripData.warnings.length">
-          <div class="section-title">
-            注意事项
-          </div>
+        <div
+          v-if="tripData.warnings && tripData.warnings.length"
+          class="card warnings-card"
+        >
+          <div class="section-title">注意事项</div>
           <ul class="warnings-list">
-            <li v-for="(warning, index) in tripData.warnings" :key="index">{{ warning }}</li>
+            <li
+              v-for="(warning, index) in tripData.warnings"
+              :key="index"
+            >
+              {{ warning }}
+            </li>
           </ul>
         </div>
       </template>
     </div>
-    <div class="detail-footer" v-if="tripData && tripData.success === true">
-      <van-button type="primary" size="large" round @click="goChat">
+    <div
+      v-if="tripData && tripData.success === true"
+      class="detail-footer"
+    >
+      <VanButton
+        type="primary"
+        size="large"
+        round
+        @click="goChat"
+      >
         咨询AI助手
-      </van-button>
+      </VanButton>
     </div>
   </div>
 </template>
@@ -98,7 +141,7 @@ const goBack = () => {
 const tripData = ref(null)
 const errorMsg = ref(null)
 const activeDays = ref([])
-const fetchData = async () => { 
+const fetchData = async () => {
   isLoading.value = true
   const res = await post('/recommend', {
     city: formData.city,
@@ -118,11 +161,11 @@ const goChat = () => {
     path: '/chat',
     query: {
       scene: 'detail',
-      city: formData.city,
+      city: formData.city
     }
   })
 }
-onMounted(() => { 
+onMounted(() => {
   formData.city = route.query.city
   formData.budget = route.query.budget
   formData.days = route.query.days
@@ -136,9 +179,11 @@ onMounted(() => {
 .page-container {
   height: 100vh;
 }
+
 .page-header {
   height: 44px;
 }
+
 .overview-card {
   margin-bottom: 16px;
 }

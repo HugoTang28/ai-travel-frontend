@@ -3,23 +3,27 @@
   <div class="login-page">
     <div class="login-header">
       <div class="logo">
-        <van-icon name="travel" size="60" color="#1989fa" />
+        <VanIcon
+          name="travel"
+          size="60"
+          color="#1989fa"
+        />
       </div>
       <h2 class="title">AI 旅行助手</h2>
       <p class="subtitle">登录开启您的智能旅行</p>
     </div>
     <!-- 登录表单 -->
     <div class="login-form">
-      <van-form>
-        <van-cell-group inset>
-          <van-field
+      <VanForm>
+        <VanCellGroup inset>
+          <VanField
             v-model="form.username"
             name="username"
             placeholder="请输入用户名/手机号"
             :rules="[{ required: true, message: '请输入用户名' }]"
             left-icon="user-o"
           />
-          <van-field
+          <VanField
             v-model="form.password"
             type="password"
             name="password"
@@ -27,20 +31,20 @@
             :rules="[{ required: true, message: '请输入密码' }]"
             left-icon="lock"
           />
-        </van-cell-group>
+        </VanCellGroup>
         <div class="form-actions">
-          <van-button 
-            round 
-            block 
-            type="primary" 
+          <VanButton
+            round
+            block
+            type="primary"
             native-type="submit"
-            @click="goHome"
             class="login-btn"
+            @click="goHome"
           >
             登录
-          </van-button>
+          </VanButton>
         </div>
-      </van-form>
+      </VanForm>
       <!-- <div class="login-links">
         <span class="link" @click="onRegister">注册账号</span>
       </div> -->
@@ -50,7 +54,7 @@
 
 <script setup>
 import { reactive } from 'vue'
-import { showToast, showFailToast  } from 'vant'
+import { showToast, showFailToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
 import { post } from '@/utils/request'
 import { useUserStore } from '@/store/index.js'
@@ -61,11 +65,11 @@ const route = useRoute()
 // 表单数据
 const form = reactive({
   username: '',
-  password: '',
+  password: ''
 })
 
 // 提交登录
-const goHome = async () => { 
+const goHome = async () => {
   try {
     const res = await post('/login', {
       username: form.username,
@@ -77,18 +81,17 @@ const goHome = async () => {
       const redirectPath = route.query.redirect || '/home'
       showToast({
         message: res.message,
-        position: 'top',
-      });
+        position: 'top'
+      })
       router.push(redirectPath)
     }
   } catch (error) {
     showFailToast({
       message: `登录失败!`,
-      position: 'top',
-    });
+      position: 'top'
+    })
   }
 }
-
 </script>
 
 <style lang="scss" scoped>

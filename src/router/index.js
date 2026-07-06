@@ -4,73 +4,73 @@ const routes = [
   {
     path: '/login',
     name: 'login',
-    component: () => import('@/views/Login/index.vue'),
+    component: () => import('@/views/Login/index.vue')
   },
   {
     path: '/',
-    redirect: '/home',
+    redirect: '/home'
   },
   {
     path: '/home',
     name: 'home',
     component: () => import('@/views/Home/index.vue'),
     meta: {
-      requiresAuth: true,
-    },
+      requiresAuth: true
+    }
   },
   {
     path: '/hotCity',
     name: 'hotCity',
     component: () => import('@/views/HotCity/index.vue'),
     meta: {
-      requiresAuth: true,
-    },
+      requiresAuth: true
+    }
   },
   {
     path: '/contact',
     name: 'contact',
     component: () => import('@/views/contact/index.vue'),
     meta: {
-      requiresAuth: true,
-    },
+      requiresAuth: true
+    }
   },
   {
     path: '/chat',
     name: 'chat',
     component: () => import('@/views/Chat/index.vue'),
     meta: {
-      requiresAuth: true,
-    },
+      requiresAuth: true
+    }
   },
   {
     path: '/user',
     name: 'user',
     component: () => import('@/views/User/index.vue'),
     meta: {
-      requiresAuth: true,
-    },
+      requiresAuth: true
+    }
   },
   {
     path: '/detail',
     name: 'detail',
     component: () => import('@/views/detail/index.vue'),
     meta: {
-      requiresAuth: true,
-    },
+      requiresAuth: true
+    }
   },
   {
     path: '/setting',
     name: 'setting',
     component: () => import('@/views/setting.vue'),
     meta: {
-      requiresAuth: true,
-    },
-  },
+      requiresAuth: true
+    }
+  }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
-  routes,
+  routes
 })
 
 router.beforeEach((to) => {
@@ -80,8 +80,8 @@ router.beforeEach((to) => {
     return {
       path: '/login',
       query: {
-        redirect: to.fullPath,
-      },
+        redirect: to.fullPath
+      }
     }
   }
 

@@ -35,7 +35,7 @@ export function formatTimeDiff(distance) {
     days,
     hours: hours < 10 ? `0${hours}` : hours,
     minutes: minutes < 10 ? `0${minutes}` : minutes,
-    seconds: seconds < 10 ? `0${seconds}` : seconds,
+    seconds: seconds < 10 ? `0${seconds}` : seconds
   }
 }
 
@@ -46,11 +46,11 @@ export function formatTimeDiff(distance) {
  * @returns {Function}
  */
 export function throttle(fn, wait) {
-  var context, args
-  var previous = 0
+  let context, args
+  let previous = 0
 
   return function () {
-    var now = +new Date()
+    const now = +new Date()
     context = this
     args = arguments
     if (now - previous > wait) {
@@ -70,7 +70,7 @@ export function throttle(fn, wait) {
 export function debounce(method, wait, immediate) {
   let timeout
   return function (...args) {
-    let context = this
+    const context = this
     if (timeout) {
       clearTimeout(timeout)
     }
@@ -80,7 +80,7 @@ export function debounce(method, wait, immediate) {
        * 如果定时器不存在，则立即执行，并设置一个定时器，wait毫秒后将定时器置为null
        * 这样确保立即执行后wait毫秒内不会被再次触发
        */
-      let callNow = !timeout
+      const callNow = !timeout
       timeout = setTimeout(() => {
         timeout = null
       }, wait)
@@ -121,7 +121,7 @@ export function showMsg(masg) {
     positiveText: '关闭',
     onPositiveClick: () => {
       // message.success('确定')
-    },
+    }
   })
 }
 
@@ -147,14 +147,14 @@ export function removeEmptyValues(obj) {
 
 // 数字四舍五入
 export function parseFloatFn(num, pos = 2) {
-  var f = parseFloat(num)
+  let f = parseFloat(num)
   if (isNaN(f)) {
     f = 0
   } else {
     f = Math.round(num * Math.pow(10, pos)) / Math.pow(10, pos)
   }
-  var s = f.toString()
-  var rs = s.indexOf('.')
+  let s = f.toString()
+  let rs = s.indexOf('.')
   if (rs < 0) {
     rs = s.length
     s += '.'
@@ -169,7 +169,7 @@ export function parseFloatFn(num, pos = 2) {
 export function objectToQueryString(obj) {
   return Object.keys(obj)
     .map((key) => {
-      let value = obj[key]
+      const value = obj[key]
       if (Array.isArray(value)) {
         return value
           .map((arrayValue) => encodeURIComponent(key) + '=' + encodeURIComponent(arrayValue))

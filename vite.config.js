@@ -6,20 +6,20 @@ export default defineConfig(({ mode }) => {
   // 加载对应环境变量
   const env = loadEnv(mode, process.cwd())
 
-  return {  
+  return {
     plugins: [vue()],
     server: {
       proxy: {
         '/api/travel': {
           target: env.VITE_API_BASE_URL,
-          changeOrigin: true,
-        },
-      },
+          changeOrigin: true
+        }
+      }
     },
     resolve: {
       alias: {
-        '@': path.resolve(__dirname, 'src'),
-      },
-    },
+        '@': path.resolve(__dirname, 'src')
+      }
+    }
   }
 })
