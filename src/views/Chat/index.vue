@@ -13,27 +13,11 @@
         </template>
       </van-nav-bar>
     </div>
-    <van-popup
+    <sideBar
       v-model:show="conversationListShow"
-      position="right"
-      :style="{ width: '50%', height: '100%' }"
-    >
-      <div class="conversation">
-        <div class="addNewConversation" @click="debounceAddNewConversation">
-          <img class="newIcon" src="@/assets/images/new.png" alt="">
-          <span>新建对话</span>
-        </div>
-        <div class="historicalConversation">历史对话</div>
-        <div class="conversationItem" 
-          v-for="item in conversations"
-          :key="item.id"
-          @click="switchConversation(item.id)"
-        >
-          <div class="msgTitle">{{ item.title }}</div>
-          <van-icon @click.stop="deleteConversations(item.id)" name="delete-o" size="20" />
-        </div>
-      </div>
-    </van-popup>
+      :messages="messages"
+    ></sideBar>
+
     <!-- 主体聊天内容 -->
     <div class="chat-container">
       <div v-if="messages.length === 0" class="chat-empty">
@@ -42,7 +26,14 @@
         ></van-empty>
         <div class="quick-questions">
           <div class="quick-title">常见问题</div>
-          <van-tag @click="handleClick(tag)" v-for="tag in quickQuestions" :key="tag" size="large" mark class="quick-tag">
+          <van-tag 
+            @click="selectTag(tag)" 
+            v-for="tag in quickQuestions" 
+            :key="tag" 
+            size="large" 
+            mark 
+            class="quick-tag"
+          >
             {{ tag }}
           </van-tag>
         </div>
@@ -84,14 +75,15 @@ import { ref, onMounted, computed, nextTick }  from 'vue'
 import { fetchStream } from '@/utils/request.js'
 import { showToast } from 'vant'
 import ChatBubble from '@/components/chat/ChatBubble.vue'
-import { useChatStre } from '@/store/index.js'
-import { debounce } from '@/utils/common.js'
+import sideBar from '@/components/chat/sideBar.vue'
+import { useChatStore } from '@/store/index.js'
 
 const router = useRouter()
 const route = useRoute()
 const inputMessage = ref('')
-const conversationListShow = ref(false) // 对话列表弹出框
-const chatStore = useChatStre()
+const conversationListShow = ref(false)
+
+const chatStore = useChatStore()
 // 对话数据
 let messages = ref([])
 const quickQuestions = [
@@ -112,7 +104,7 @@ const addUserMessage = (content) => {
 
 const isStreaming = ref(false)
 
-const handleClick = (tag) => {
+const selectTag = (tag) => {
   inputMessage.value = tag
 }
 
@@ -170,38 +162,12 @@ const sendMessage = () => {
   fetchAiResponse(msg)
 }
 
-const conversations = chatStore.conversations
-console.log(conversations.value)
 
 // 打开对话列表弹框
 const openConversationList = () => {
   conversationListShow.value = true
 }
-// 新增一个对话
-const addNewConversation = () => {
-  chatStore.creatConversation()
-  messages.value = [] // 新建对话后，清空页面消息显示
-  conversationListShow.value = false
-}
-const debounceAddNewConversation = debounce(addNewConversation, 1000, true)
-// 删除对话
-const deleteConversations = async (id) => {
-  try {
-    chatStore.deleteConversation(id)
-  } catch (error) {
-    console.log("删除对话失败");
-  }
-}
-// 切换对话
-const switchConversation = (id) => {
-  try {
-    chatStore.switchConversation(id)
-    messages.value = chatStore.currentConversation.messages
-    conversationListShow.value = false
-  } catch (error) {
-    console.log('对话切换失败：', error);
-  }
-}
+
 onMounted(async () => {
   if (route.query.scene === 'detail' && route.query.city) {
     inputMessage.value = `我想去${route.query.city}，请给我制定一个旅行计划`
@@ -283,48 +249,5 @@ onMounted(async () => {
   background: #f7f8fa;
   border-radius: 20px;
   padding: 8px 16px;
-}
-
-// 历史对话
-.conversation {
-  padding: 5px 10px;
-  .addNewConversation {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    padding: 5px;
-    background-color: #efefef;
-    font-size: 20px;
-    margin: 5px 0 10px 0;
-    border-radius: 8px;
-    .newIcon {
-      width: 20px;
-      height: 20px;
-      line-height: 20px;
-      padding-right: 5px;
-    }
-  }
-  .historicalConversation {
-    margin-top: 14px;
-    font-size: 15px;
-    color: #7c7c7c;
-    font-family: "宋体", serif;
-  }
-  .conversationItem {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 5px 10px;
-    border: 1px solid #bdb6b6;
-    border-radius: 8px;
-    margin-top: 8px;
-    .msgTitle {
-      font-size: 20px;
-      line-height: 1;
-    }
-  }
-  // .conversationItem:hover {
-  //   background-color: #efefef;
-  // }
 }
 </style>

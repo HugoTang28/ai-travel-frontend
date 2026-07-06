@@ -2,7 +2,7 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { v4 as uuidv4 } from 'uuid';
 
-export const useChatStre = defineStore('chat', () => {
+export const useChatStore = defineStore('chat', () => {
   // 所有对话列表
   const conversations = ref([
     {

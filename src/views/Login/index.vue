@@ -53,7 +53,9 @@ import { reactive } from 'vue'
 import { showToast, showFailToast  } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
 import { post } from '@/utils/request'
+import { useUserStore } from '@/store/index.js'
 
+const userStore = useUserStore()
 const router = useRouter()
 const route = useRoute()
 // 表单数据
@@ -70,6 +72,7 @@ const goHome = async () => {
       password: form.password
     })
     if (res.success) {
+      userStore.postUserInfo(res.user) // 上传用户信息到store
       localStorage.setItem('AITRAVEL_TOKEN', res.token)
       const redirectPath = route.query.redirect || '/home'
       showToast({

@@ -80,11 +80,11 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
-import favicon from '../../assets/images/favicon.png'
+import favicon from '@/assets/images/favicon.png'
+import { useUserStore } from '@/store/index.js'
 
-// 用户信息
-// const userAvatar = 'https://img.yzcdn.cn/vant/cat.jpeg'
-const userName = '游客'
+const userStore = useUserStore()
+const userName = userStore.userInfo.nickname
 const router = useRouter()
 // 对话框状态
 const aboutDialogVisible = ref(false)
