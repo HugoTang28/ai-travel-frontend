@@ -1,5 +1,35 @@
 import dayjs from 'dayjs'
 
+// ============ Token Cookie 工具 ============
+const TOKEN_KEY = 'AITRAVEL_TOKEN'
+/**
+ * @desc  设置 token 到 Cookie
+ * @param {string} token
+ * @param {number} days 过期天数，默认 1 天
+ */
+export function setToken(token, days = 1) {
+  const expires = new Date(Date.now() + days * 86400000).toUTCString()
+  // Secure 仅在 HTTPS 下发送；SameSite=Strict 防止 CSRF
+  document.cookie = `${TOKEN_KEY}=${encodeURIComponent(token)};expires=${expires};path=/;SameSite=Strict`
+}
+/**
+ * @desc  从 Cookie 读取 token
+ * @returns {string|null}
+ */
+export function getToken() {
+  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${TOKEN_KEY}=([^;]*)`))
+  return match ? decodeURIComponent(match[1]) : null
+}
+
+/**
+ * @desc  删除 token Cookie（退出登录时用）
+ */
+export function removeToken() {
+  document.cookie = `${TOKEN_KEY}=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/`
+}
+
+// ============ 原有工具函数 ============
+
 /**
  * @desc  格式化时间
  * @param {(Object|string|number)} time

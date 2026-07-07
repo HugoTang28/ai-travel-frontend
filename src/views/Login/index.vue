@@ -22,12 +22,14 @@
             placeholder="请输入用户名/手机号"
             :rules="[{ required: true, message: '请输入用户名' }]"
             left-icon="user-o"
+            autocomplete="off"
           />
           <VanField
             v-model="form.password"
             type="password"
             name="password"
             placeholder="请输入密码"
+            autocomplete="off"
             :rules="[{ required: true, message: '请输入密码' }]"
             left-icon="lock"
           />
@@ -58,6 +60,7 @@ import { showToast, showFailToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
 import { post } from '@/utils/request'
 import { useUserStore } from '@/store/index.js'
+import { setToken } from '@/utils/common.js'
 
 const userStore = useUserStore()
 const router = useRouter()
@@ -77,7 +80,7 @@ const goHome = async () => {
     })
     if (res.success) {
       userStore.postUserInfo(res.user) // 上传用户信息到store
-      localStorage.setItem('AITRAVEL_TOKEN', res.token)
+      setToken(res.token) // 存入Cookie，默认1天过期
       const redirectPath = route.query.redirect || '/home'
       showToast({
         message: res.message,
@@ -139,16 +142,4 @@ const goHome = async () => {
     }
   }
 }
-// .login-links {
-//   display: flex;
-//   justify-content: flex-end;
-//   padding: 0 16px;
-//   margin-top: 20px;
-//   font-size: 14px;
-//   color: #969799;
-//   .link {
-//     color: #1989fa;
-//     cursor: pointer;
-//   }
-// }
 </style>

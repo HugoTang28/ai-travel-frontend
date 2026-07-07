@@ -46,12 +46,8 @@ const chatStore = useChatStore()
 const conversations = chatStore.conversations
 
 // 删除对话
-const deleteConversations = async (id) => {
-  try {
-    chatStore.deleteConversation(id)
-  } catch (error) {
-    console.log('删除对话失败')
-  }
+const deleteConversations = (id) => {
+  chatStore.deleteConversation(id)
 }
 
 // 新建对话
@@ -66,7 +62,8 @@ const debounceAddNewConversation = debounce(addNewConversation, 1000, true)
 const switchConversation = (id) => {
   try {
     chatStore.switchConversation(id)
-    emit('messages', chatStore.currentConversation.messages)
+    const msgs = chatStore.currentConversation?.messages || []
+    emit('messages', msgs)
     emit('update:show', false)
   } catch (error) {
     console.log('对话切换失败：', error)

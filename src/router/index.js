@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { getToken } from '@/utils/common.js'
 
 const routes = [
   {
@@ -74,7 +75,7 @@ const router = createRouter({
 })
 
 router.beforeEach((to) => {
-  const token = localStorage.getItem('AITRAVEL_TOKEN')
+  const token = getToken()
 
   if (to.meta.requiresAuth && !token) {
     return {

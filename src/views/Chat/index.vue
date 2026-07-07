@@ -19,7 +19,7 @@
     </div>
     <SideBar
       v-model:show="conversationListShow"
-      :messages="messages"
+      @messages="(newMsgs) => (messages = newMsgs)"
     ></SideBar>
 
     <!-- 主体聊天内容 -->
@@ -70,7 +70,7 @@
         v-model="inputMessage"
         placeholder="请输入你的问题"
         :disabled="isStreaming"
-        @keyup.enter="sendMessage"
+        @keydown.enter="sendMessage"
       >
         <template #button>
           <VanButton
@@ -95,6 +95,7 @@ import { showToast } from 'vant'
 import ChatBubble from '@/components/chat/ChatBubble.vue'
 import SideBar from '@/components/chat/sideBar.vue'
 import { useChatStore } from '@/store/index.js'
+import { v4 as uuidv4 } from 'uuid'
 
 const router = useRouter()
 const route = useRoute()
@@ -113,7 +114,7 @@ const quickQuestions = [
 
 const addUserMessage = (content) => {
   messages.value.push({
-    id: Date.now(),
+    id: uuidv4(),
     role: 'user',
     content,
     timestamp: new Date().toISOString()
@@ -130,7 +131,7 @@ const selectTag = (tag) => {
 const fetchAiResponse = (userMsg) => {
   isStreaming.value = true
   messages.value.push({
-    id: Date.now() + 1,
+    id: uuidv4(),
     role: 'ai',
     content: '',
     timestamp: new Date().toISOString()

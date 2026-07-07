@@ -57,6 +57,10 @@
           title="版本信息"
           value="v1.0.0"
         />
+        <VanCell
+          title="退出登录"
+          @click="layout"
+        />
       </VanCellGroup>
     </div>
 
@@ -82,6 +86,7 @@ import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import favicon from '@/assets/images/favicon.png'
 import { useUserStore } from '@/store/index.js'
+import { removeToken } from '@/utils/common.js'
 
 const userStore = useUserStore()
 const userName = userStore.userInfo.nickname
@@ -96,6 +101,12 @@ const showAboutDialog = () => {
 
 const goSetting = () => {
   router.push('/setting')
+}
+
+const layout = () => {
+  removeToken()
+  router.push('/login')
+  showToast('退出成功')
 }
 </script>
 

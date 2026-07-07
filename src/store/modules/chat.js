@@ -18,13 +18,13 @@ export const useChatStore = defineStore(
         title: '测试对话',
         messages: [
           {
-            id: Date.now(),
+            id: uuidv4(),
             role: 'user',
             content: '你好，这是测试消息',
             timestamp: new Date().toISOString()
           },
           {
-            id: Date.now(),
+            id: uuidv4(),
             role: 'ai',
             content: '这是测试消息的回复',
             timestamp: new Date().toISOString()
@@ -42,7 +42,7 @@ export const useChatStore = defineStore(
     })
 
     // 当前对话的message
-    const currentMesages = computed(() => {
+    const currentMessages = computed(() => {
       return currentConversation.value.messages || []
     })
 
@@ -88,7 +88,7 @@ export const useChatStore = defineStore(
       conversations,
       currentConversationId,
       currentConversation,
-      currentMesages,
+      currentMessages,
       creatConversation,
       switchConversation,
       deleteConversation,
