@@ -32,7 +32,7 @@ export default [
       // ============ JS 基础规则 ============
       'no-var': 'error',
       'prefer-const': 'error',
-      'no-console': 'warn',
+      // 'no-console': 'warn',
       'no-debugger': 'warn',
       eqeqeq: ['error', 'always'],
       'no-unused-vars': ['warn', { argsIgnorePattern: '^_', varsIgnorePattern: '^_' }],

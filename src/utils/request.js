@@ -68,7 +68,6 @@ export async function fetchStream(url, data, onChunk, onComplete, onError) {
       const chunk = decoder.decode(value, { stream: true })
       const lines = chunk.split('\n').filter((line) => line.trim())
       for (const line of lines) {
-        // console.log(line);
         try {
           if (line.startsWith('data:')) {
             const jsonStr = line.substring(6)
@@ -82,9 +81,9 @@ export async function fetchStream(url, data, onChunk, onComplete, onError) {
             }
           }
         } catch (error) {
-          onError('流式数据解析异常')
+          console.error('流式数据解析异常', error)
         }
-
+      }
     }
     return controller.abort()
   } catch (error) {

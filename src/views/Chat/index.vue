@@ -89,11 +89,11 @@
 
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
-import { ref, onMounted, computed, nextTick } from 'vue'
+import { ref, onMounted } from 'vue'
 import { fetchStream } from '@/utils/request.js'
 import { showToast } from 'vant'
 import ChatBubble from '@/components/chat/ChatBubble.vue'
-import sideBar from '@/components/chat/sideBar.vue'
+import SideBar from '@/components/chat/sideBar.vue'
 import { useChatStore } from '@/store/index.js'
 
 const router = useRouter()
