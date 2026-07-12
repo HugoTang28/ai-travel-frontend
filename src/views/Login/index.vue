@@ -1,4 +1,3 @@
-```1:65:src/views/Login/index.vue
 <template>
   <div class="login-page">
     <div class="login-header">
@@ -58,7 +57,7 @@
 import { reactive } from 'vue'
 import { showToast, showFailToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
-import { post } from '@/utils/request'
+import request from '@/utils/request'
 import { useUserStore } from '@/store/index.js'
 import { setToken } from '@/utils/common.js'
 
@@ -74,7 +73,7 @@ const form = reactive({
 // 提交登录
 const goHome = async () => {
   try {
-    const res = await post('/login', {
+    const res = await request.post('/login', {
       username: form.username,
       password: form.password
     })

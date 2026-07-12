@@ -123,7 +123,7 @@
 <script setup>
 import { reactive, onMounted, ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
-import { post } from '@/utils/request.js'
+import request from '@/utils/request.js'
 import SpotItem from '@/components/detail/SpotItem.vue'
 import BudgetTable from '@/components/detail/BudgetTable.vue'
 
@@ -143,7 +143,7 @@ const errorMsg = ref(null)
 const activeDays = ref([])
 const fetchData = async () => {
   isLoading.value = true
-  const res = await post('/recommend', {
+  const res = await request.post('/recommend', {
     city: formData.city,
     budget: formData.budget,
     days: formData.days

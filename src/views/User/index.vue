@@ -89,7 +89,7 @@ import { useUserStore } from '@/store/index.js'
 import { removeToken } from '@/utils/common.js'
 
 const userStore = useUserStore()
-const userName = userStore.userInfo.nickname
+const userName = userStore.userInfo.nickname || 'Test'
 const router = useRouter()
 // 对话框状态
 const aboutDialogVisible = ref(false)
@@ -176,4 +176,3 @@ const layout = () => {
   text-align: center;
 }
 </style>
-```

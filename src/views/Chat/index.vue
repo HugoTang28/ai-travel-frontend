@@ -173,9 +173,9 @@ const sendMessage = () => {
   if (!msg || isStreaming.value) {
     return
   }
-  if (messages.value.length !== 0) {
-    chatStore.creatConversation()
-  }
+  // if (messages.value.length !== 0) {
+  //   chatStore.creatConversation()
+  // }
   chatStore.addMessage({
     role: 'user',
     content: msg,

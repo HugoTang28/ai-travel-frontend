@@ -116,7 +116,7 @@ import { nextTick, reactive, ref, watch, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import { debounce } from '@/utils/common.js'
-import { post } from '@/utils/request.js'
+import request from '@/utils/request.js'
 
 const router = useRouter()
 const loading = ref(false)
@@ -193,7 +193,7 @@ const handleSubmit = () => {
 
 const suggestRef = ref(null)
 const isMenu = ref(false)
-const selectedValues = ref(null)
+// const selectedValues = ref(null)
 const searchCityList = ref([])
 // 模糊搜索
 const keywordChange = async (keyword) => {
@@ -204,7 +204,7 @@ const keywordChange = async (keyword) => {
     return
   }
   try {
-    const data = await post('/searchCity', { keyword: city })
+    const data = await request.post('/searchCity', { keyword: city })
     const list = data?.data || []
     searchCityList.value = list.map((item) => ({
       text: item.cityName,
