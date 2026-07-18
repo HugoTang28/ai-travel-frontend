@@ -31,13 +31,11 @@
 </template>
 
 <script setup>
-import { ref, watch, computed } from 'vue'
+import { ref, watch } from 'vue'
 import { useRoute } from 'vue-router'
 
 const route = useRoute()
 const active = ref('home')
-
-// const showTabbar = computed(() => route.name === 'home' || route.path === 'chat' || route.path === 'user')
 
 watch(
   () => route.path,
