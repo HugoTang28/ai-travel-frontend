@@ -23,7 +23,10 @@
     ></SideBar>
 
     <!-- 主体聊天内容 -->
-    <div class="chat-container">
+    <div
+      ref="chatContainer"
+      class="chat-container"
+    >
       <div
         v-if="messages.length === 0"
         class="chat-empty"
@@ -89,7 +92,7 @@
 
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
-import { ref, onMounted } from 'vue'
+import { ref, onMounted, nextTick } from 'vue'
 import { fetchStream } from '@/utils/request.js'
 import { showToast } from 'vant'
 import ChatBubble from '@/components/chat/ChatBubble.vue'
@@ -123,6 +126,15 @@ const addUserMessage = (content) => {
 
 const isStreaming = ref(false)
 
+// 自动滚动到底部
+const chatContainer = ref(null)
+const scrollToBottom = () => {
+  nextTick(() => {
+    const el = chatContainer.value
+    if (el) el.scrollTop = el.scrollHeight // scrollHeight:容器里内容的完整总高度,scrollTop:内容从顶部往下滚了多少像素
+  })
+}
+
 const selectTag = (tag) => {
   inputMessage.value = tag
 }
@@ -147,6 +159,7 @@ const fetchAiResponse = (userMsg) => {
       if (lastMsg && lastMsg.role === 'ai') {
         lastMsg.content = fullResponse
       }
+      scrollToBottom()
     },
     () => {
       chatStore.addMessage({
@@ -155,6 +168,7 @@ const fetchAiResponse = (userMsg) => {
         timestamp: new Date().toISOString()
       })
       isStreaming.value = false
+      scrollToBottom()
     },
     (errMsg) => {
       const lastMsg = messages.value[messages.value.length - 1]
@@ -162,6 +176,7 @@ const fetchAiResponse = (userMsg) => {
         lastMsg.content = `抱歉，AI发生了错误${errMsg}`
       }
       isStreaming.value = false
+      scrollToBottom()
       showToast('AI回复失败！')
     }
   )
@@ -183,6 +198,7 @@ const sendMessage = () => {
   })
   addUserMessage(msg)
   inputMessage.value = ''
+  scrollToBottom()
   // 进行流式请求
   fetchAiResponse(msg)
 }
@@ -212,11 +228,11 @@ onMounted(async () => {
 }
 
 .chat-container {
-  // flex: 1;
-  height: 650px;
+  flex: 1;
+  min-height: 0;
   overflow-y: auto;
   padding: 16px;
-  padding-bottom: 60px;
+  padding-bottom: 130px;
 }
 
 .chat-empty {
