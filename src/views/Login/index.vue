@@ -72,26 +72,30 @@ const form = reactive({
 
 // 提交登录
 const goHome = async () => {
+  let res
   try {
-    const res = await request.post('/login', {
+    res = await request.post('/login', {
       username: form.username,
       password: form.password
     })
-    if (res.success) {
+    console.log('登录返回：', res)
+    if (Number(res.code) === 1) {
       userStore.postUserInfo(res.user) // 上传用户信息到store
-      setToken(res.token) // 存入Cookie，默认1天过期
-      const redirectPath = route.query.redirect || '/home'
+      setToken(res.data && res.data.token)
       showToast({
-        message: res.message,
+        message: res.msg,
         position: 'top'
       })
+      const redirectPath = route.query.redirect || '/home'
       router.push(redirectPath)
+    } else {
+      showFailToast({
+        message: res.msg || '登录失败',
+        position: 'top'
+      })
     }
   } catch (error) {
-    showFailToast({
-      message: `登录失败!`,
-      position: 'top'
-    })
+    console.log(error)
   }
 }
 </script>

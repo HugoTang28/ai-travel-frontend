@@ -10,9 +10,10 @@ export default defineConfig(({ mode }) => {
     plugins: [vue()],
     server: {
       proxy: {
-        '/api/travel': {
+        '/api': {
           target: env.VITE_API_BASE_URL,
-          changeOrigin: true
+          changeOrigin: true,
+          rewrite: (p) => p.replace(/^\/api/, '')
         }
       }
     },

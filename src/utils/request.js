@@ -3,7 +3,7 @@ import { getToken } from '@/utils/common.js'
 
 // 创建axios实例
 const request = axios.create({
-  baseURL: '/api/travel',
+  baseURL: '/api',
   timeout: 1000000,
   headers: { 'Content-Type': 'application/json;charset=UTF-8' }
 })

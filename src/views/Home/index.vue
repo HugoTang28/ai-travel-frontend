@@ -112,7 +112,7 @@
   </div>
 </template>
 <script setup>
-import { nextTick, reactive, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { reactive, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import { debounce } from '@/utils/common.js'
@@ -196,7 +196,7 @@ const isMenu = ref(false)
 // const selectedValues = ref(null)
 const searchCityList = ref([])
 // 模糊搜索
-const keywordChange = async (keyword) => {
+const keywordChange = async () => {
   const city = formData.city.trim()
   if (!city) {
     searchCityList.value = []
