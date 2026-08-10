@@ -32,12 +32,6 @@ request.interceptors.response.use(
   }
 )
 
-// export function post(url, data) {
-//   return request.post(url, data)
-// }
-// export function get(url, params) {
-//   return request.get(url, { params })
-// }
 export default request
 
 // 处理流式接口
