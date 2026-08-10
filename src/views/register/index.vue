@@ -81,7 +81,7 @@
 import { reactive, ref } from 'vue'
 import { showToast, showFailToast } from 'vant'
 import { useRouter } from 'vue-router'
-import request from '@/utils/request'
+import { register } from '@/api/user.js'
 
 const router = useRouter()
 const loading = ref(false)
@@ -107,7 +107,7 @@ const resetForm = () => {
 const onRegister = async () => {
   loading.value = true
   try {
-    const res = await request.post('/register', { ...form })
+    const res = await register({ ...form })
     console.log('注册返回：', res)
     if (res.code === 1) {
       showToast({ message: '注册成功', position: 'top' })

@@ -1,19 +1,23 @@
 import dayjs from 'dayjs'
+import Cookies from 'js-cookie'
 
-// ============ Token Cookie 工具 ============
-const TOKEN_KEY = 'travel_token'
 export function setToken(token) {
-  document.cookie = `${TOKEN_KEY}=${token};path=/`
+  // expires：单位天；根据你的JWT过期时间设置
+  Cookies.set('token', token, {
+    // expires: 7,
+    // 如果后端跨域，部署时加上 secure:true; 生产环境https开启
+    // secure: true,
+    sameSite: 'strict'
+  })
 }
-
+// 获取Token
 export function getToken() {
-  const match = document.cookie.match(new RegExp(`(?:^|;\\s*)${TOKEN_KEY}=([^;]*)`))
-  return match ? match[1] : null
+  return Cookies.get('token')
 }
+// 删除Token
 export function removeToken() {
-  document.cookie = `${TOKEN_KEY}=;expires=${new Date(0).toUTCString()};path=/`
+  Cookies.remove('token')
 }
-
 /**
  * @desc  格式化时间
  * @param {(Object|string|number)} time

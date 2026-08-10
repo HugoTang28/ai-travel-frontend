@@ -61,7 +61,7 @@
 import { reactive } from 'vue'
 import { showToast, showFailToast } from 'vant'
 import { useRoute, useRouter } from 'vue-router'
-import request from '@/utils/request'
+import { login } from '@/api/user.js'
 import { useUserStore } from '@/store/index.js'
 import { setToken } from '@/utils/common.js'
 
@@ -82,14 +82,19 @@ const form = reactive({
 const goHome = async () => {
   let res
   try {
-    res = await request.post('/login', {
+    res = await login({
       username: form.username,
       password: form.password
     })
     console.log('登录返回：', res)
     if (Number(res.code) === 1) {
-      userStore.postUserInfo(res.user) // 上传用户信息到store
-      setToken(res.data && res.data.token)
+      userStore.postUserInfo({
+        id: res.data.id,
+        username: res.data.username,
+        nickname: res.data.nickname,
+        avatar: res.data.avatar
+      }) // 上传用户信息到store
+      setToken(res.data.token)
       showToast({
         message: res.msg,
         position: 'top'

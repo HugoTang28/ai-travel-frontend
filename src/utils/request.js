@@ -13,7 +13,7 @@ request.interceptors.request.use(
   (config) => {
     const token = getToken()
     if (token) {
-      config.headers.Authorization = `Bearer ${token}`
+      config.headers.token = token
     }
     return config
   },
@@ -21,7 +21,6 @@ request.interceptors.request.use(
     return Promise.reject(error)
   }
 )
-
 // 响应拦截器
 request.interceptors.response.use(
   (response) => {

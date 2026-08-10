@@ -9,13 +9,13 @@
     <!-- 用户信息区域 -->
     <div class="user-info">
       <VanImage
-        :src="favicon"
+        :src="avatar"
         round
         class="avatar"
       />
       <div class="user-details">
         <h2 class="user-name">{{ userName }}</h2>
-        <p class="user-desc">欢迎使用智能旅游助手</p>
+        <p class="user-desc">{{ userInfo.phone }}</p>
       </div>
     </div>
 
@@ -81,15 +81,19 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { onMounted, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
-import favicon from '@/assets/images/favicon.png'
 import { useUserStore } from '@/store/index.js'
 import { removeToken } from '@/utils/common.js'
+import { getUserInfo } from '@/api/user'
+
+const userInfo = ref({})
 
 const userStore = useUserStore()
-const userName = userStore.userInfo.nickname || 'Test'
+const userName = userStore.userInfo.nickname
+const avatar = userStore.userInfo.avatar
+const id = userStore.userInfo.id
 const router = useRouter()
 // 对话框状态
 const aboutDialogVisible = ref(false)
@@ -108,6 +112,15 @@ const layout = () => {
   router.push('/login')
   showToast('退出成功')
 }
+
+onMounted(async () => {
+  const res = await getUserInfo(id)
+  if (res.code === 1) {
+    userInfo.value = res.data
+  } else {
+    console.log(res.msg)
+  }
+})
 </script>
 
 <style scoped>
