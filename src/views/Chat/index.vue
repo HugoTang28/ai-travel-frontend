@@ -17,10 +17,7 @@
         </template>
       </VanNavBar>
     </div>
-    <SideBar
-      v-model:show="conversationListShow"
-      @messages="(newMsgs) => (messages = newMsgs)"
-    ></SideBar>
+    <SideBar v-model:show="conversationListShow"></SideBar>
 
     <!-- 主体聊天内容 -->
     <div
@@ -92,13 +89,12 @@
 
 <script setup>
 import { useRouter, useRoute } from 'vue-router'
-import { ref, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, nextTick } from 'vue'
 import { fetchStream } from '@/utils/request.js'
 import { showToast } from 'vant'
 import ChatBubble from '@/components/chat/ChatBubble.vue'
 import SideBar from '@/components/chat/sideBar.vue'
 import { useChatStore } from '@/store/index.js'
-import { v4 as uuidv4 } from 'uuid'
 
 const router = useRouter()
 const route = useRoute()
@@ -106,23 +102,14 @@ const inputMessage = ref('')
 const conversationListShow = ref(false)
 
 const chatStore = useChatStore()
-// 对话数据
-const messages = ref([])
+// 对话数据：直接由 store 的当前对话驱动，避免本地副本与 store 脱节
+const messages = computed(() => chatStore.currentMessages)
 const quickQuestions = [
   '北京有哪些必去的景点？',
   '上海美食推荐',
   '成都三日游攻略',
   '如何选择旅行保险？'
 ]
-
-const addUserMessage = (content) => {
-  messages.value.push({
-    id: uuidv4(),
-    role: 'user',
-    content,
-    timestamp: new Date().toISOString()
-  })
-}
 
 const isStreaming = ref(false)
 
@@ -142,12 +129,13 @@ const selectTag = (tag) => {
 // 获取响应
 const fetchAiResponse = (userMsg) => {
   isStreaming.value = true
-  messages.value.push({
-    id: uuidv4(),
+  // 先写入一条空的 AI 消息占位，拿到 id 用于流式增量更新
+  const aiMsg = chatStore.addMessage({
     role: 'ai',
     content: '',
     timestamp: new Date().toISOString()
   })
+  const aiId = aiMsg.id
   let fullResponse = ''
 
   fetchStream(
@@ -155,26 +143,17 @@ const fetchAiResponse = (userMsg) => {
     { message: userMsg },
     (chunk) => {
       fullResponse += chunk
-      const lastMsg = messages.value[messages.value.length - 1]
-      if (lastMsg && lastMsg.role === 'ai') {
-        lastMsg.content = fullResponse
-      }
+      // 增量写回 store 当前对话，视图自动同步
+      chatStore.updateMessage(aiId, fullResponse)
       scrollToBottom()
     },
     () => {
-      chatStore.addMessage({
-        role: 'ai',
-        content: fullResponse,
-        timestamp: new Date().toISOString()
-      })
+      chatStore.updateMessage(aiId, fullResponse)
       isStreaming.value = false
       scrollToBottom()
     },
     (errMsg) => {
-      const lastMsg = messages.value[messages.value.length - 1]
-      if (lastMsg && lastMsg.role === 'ai') {
-        lastMsg.content = `抱歉，AI发生了错误${errMsg}`
-      }
+      chatStore.updateMessage(aiId, `抱歉，AI发生了错误${errMsg}`)
       isStreaming.value = false
       scrollToBottom()
       showToast('AI回复失败！')
@@ -188,15 +167,12 @@ const sendMessage = () => {
   if (!msg || isStreaming.value) {
     return
   }
-  // if (messages.value.length !== 0) {
-  //   chatStore.creatConversation()
-  // }
+  // 写入用户消息（store 内部会在需要时自动新建对话并更新标题）
   chatStore.addMessage({
     role: 'user',
     content: msg,
     timestamp: new Date().toISOString()
   })
-  addUserMessage(msg)
   inputMessage.value = ''
   scrollToBottom()
   // 进行流式请求

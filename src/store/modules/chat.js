@@ -38,15 +38,17 @@ export const useChatStore = defineStore(
 
     // 当前对话
     const currentConversation = computed(() => {
-      return conversations.value.find((item) => item.id === currentConversationId.value)
+      return (
+        conversations.value.find((item) => item.id === currentConversationId.value) || null
+      )
     })
 
     // 当前对话的message
     const currentMessages = computed(() => {
-      return currentConversation.value.messages || []
+      return currentConversation.value?.messages || []
     })
 
-    // 创建新对话
+    // 创建新对话并返回
     const creatConversation = () => {
       const newConversations = {
         id: uuidv4(),
@@ -56,6 +58,7 @@ export const useChatStore = defineStore(
       }
       conversations.value.push(newConversations)
       currentConversationId.value = newConversations.id
+      return newConversations
     }
 
     // 切换对话
@@ -63,13 +66,44 @@ export const useChatStore = defineStore(
       currentConversationId.value = id
     }
 
-    // 添加消息到当前对话
+    // 根据首条用户消息生成对话标题
+    const updateTitleFromMessage = (message) => {
+      const conversation = conversations.value.find(
+        (item) => item.id === currentConversationId.value
+      )
+      if (!conversation || conversation.title !== '新对话') return
+      const text = (message.content || '').trim()
+      if (text) {
+        conversation.title = text.length > 12 ? text.slice(0, 12) + '...' : text
+      }
+    }
+
+    // 添加消息到当前对话，若当前无对话则自动新建
     const addMessage = (message) => {
+      let conversation = conversations.value.find(
+        (item) => item.id === currentConversationId.value
+      )
+      if (!conversation) {
+        conversation = creatConversation()
+      }
+      const msg = { id: uuidv4(), ...message }
+      conversation.messages.push(msg)
+      if (message.role === 'user') {
+        updateTitleFromMessage(message)
+      }
+      return msg
+    }
+
+    // 更新当前对话中指定消息的内容（用于流式增量）
+    const updateMessage = (msgId, content) => {
       const conversation = conversations.value.find(
         (item) => item.id === currentConversationId.value
       )
       if (!conversation) return
-      conversation.messages.push(message)
+      const target = conversation.messages.find((m) => m.id === msgId)
+      if (target) {
+        target.content = content
+      }
     }
 
     // 删除对话
@@ -82,6 +116,27 @@ export const useChatStore = defineStore(
         // splice(起始下标, 删除个数) 直接修改原数组
         arr.splice(targetIndex, 1)
       }
+      // 若删除的是当前对话，或删除后列表为空，保证 currentConversationId 始终有效
+      const stillExists = arr.some((item) => item.id === currentConversationId.value)
+      if (!stillExists) {
+        if (arr.length > 0) {
+          currentConversationId.value = arr[0].id
+        } else {
+          creatConversation()
+        }
+      }
+    }
+
+    // 初始化守卫：持久化恢复后保证 currentConversationId 有效
+    const validCurrent = conversations.value.some(
+      (item) => item.id === currentConversationId.value
+    )
+    if (!validCurrent) {
+      if (conversations.value.length > 0) {
+        currentConversationId.value = conversations.value[0].id
+      } else {
+        creatConversation()
+      }
     }
 
     return {
@@ -92,7 +147,8 @@ export const useChatStore = defineStore(
       creatConversation,
       switchConversation,
       deleteConversation,
-      addMessage
+      addMessage,
+      updateMessage
     }
   },
   { persist: true }

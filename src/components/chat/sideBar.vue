@@ -40,7 +40,7 @@ import { debounce } from '@/utils/common.js'
 
 const show = defineModel('show', { default: false })
 
-const emit = defineEmits(['update:show', 'messages'])
+const emit = defineEmits(['update:show'])
 
 const chatStore = useChatStore()
 const conversations = chatStore.conversations
@@ -53,7 +53,6 @@ const deleteConversations = (id) => {
 // 新建对话
 const addNewConversation = () => {
   chatStore.creatConversation()
-  emit('messages', [])
   emit('update:show', false)
 }
 const debounceAddNewConversation = debounce(addNewConversation, 1000, true)
@@ -62,8 +61,6 @@ const debounceAddNewConversation = debounce(addNewConversation, 1000, true)
 const switchConversation = (id) => {
   try {
     chatStore.switchConversation(id)
-    const msgs = chatStore.currentConversation?.messages || []
-    emit('messages', msgs)
     emit('update:show', false)
   } catch (error) {
     console.log('对话切换失败：', error)
