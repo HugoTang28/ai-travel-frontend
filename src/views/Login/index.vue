@@ -46,9 +46,13 @@
           </VanButton>
         </div>
       </VanForm>
-      <!-- <div class="login-links">
-        <span class="link" @click="onRegister">注册账号</span>
-      </div> -->
+      <div class="login-links">
+        <span
+          class="link"
+          @click="goRegister"
+          >注册账号</span
+        >
+      </div>
     </div>
   </div>
 </template>
@@ -93,6 +97,10 @@ const goHome = async () => {
       position: 'top'
     })
   }
+}
+
+const goRegister = () => {
+  router.push('/register')
 }
 </script>
 
@@ -139,6 +147,16 @@ const goHome = async () => {
       height: 44px;
       font-size: 16px;
     }
+  }
+}
+.login-links {
+  margin-top: 20px;
+  padding-right: 22px;
+  text-align: right;
+  font-size: 14px;
+  color: #1989fa;
+  .link {
+    cursor: pointer;
   }
 }
 </style>

@@ -1,6 +1,6 @@
 import { createApp } from 'vue'
 import Vant, { Locale } from 'vant'
-import enUS from 'vant/es/locale/lang/en-US' // 引入英文语言包
+// import enUS from 'vant/es/locale/lang/en-US' // 引入英文语言包
 import 'vant/lib/index.css'
 import App from './App.vue'
 import router from './router'
