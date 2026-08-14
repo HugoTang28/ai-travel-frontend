@@ -3,10 +3,7 @@
     <div class="page-header">
       <VanNavBar
         title="AI智能助手"
-        left-arrow
         fixed
-        left-text="返回"
-        @click-left="router.back()"
       >
         <template #right>
           <VanIcon
@@ -88,7 +85,7 @@
 </template>
 
 <script setup>
-import { useRouter, useRoute } from 'vue-router'
+import { useRoute } from 'vue-router'
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { fetchStream } from '@/utils/request.js'
 import { showToast } from 'vant'
@@ -96,7 +93,7 @@ import ChatBubble from '@/components/chat/ChatBubble.vue'
 import SideBar from '@/components/chat/sideBar.vue'
 import { useChatStore } from '@/store/index.js'
 
-const router = useRouter()
+// const router = useRouter()
 const route = useRoute()
 const inputMessage = ref('')
 const conversationListShow = ref(false)
