@@ -13,7 +13,7 @@
     <van-dropdown-menu class="language">
       <van-dropdown-item v-model="value1" :options="option1" />
     </van-dropdown-menu> -->
-    <VanField
+    <!-- <VanField
       v-model="formData.language"
       label="语言"
       placeholder="输入城市名"
@@ -27,7 +27,7 @@
           color="#999"
         />
       </template>
-    </VanField>
+    </VanField> -->
   </div>
 </template>
 
