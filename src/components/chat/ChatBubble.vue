@@ -73,7 +73,6 @@ const renderedHtml = computed(() => {
 // 未闭合代码块内的代码（不含 ``` 行），流式结束前不高亮
 const pendingCode = computed(() => (props.message.role === 'ai' ? streamParts.value.pending : ''))
 
-
 const pendingLangClass = computed(() => {
   const lang = streamParts.value.lang
   return lang ? `language-${lang}` : ''

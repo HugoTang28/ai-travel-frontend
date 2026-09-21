@@ -107,16 +107,16 @@ const onRegister = async () => {
   loading.value = true
   try {
     const res = await request.post('/register', { ...form })
-    console.log('注册返回：', res)
     if (res.success) {
       showToast({ message: '注册成功', position: 'top' })
       resetForm()
+      router.push('/login')
     } else {
       showFailToast({ message: res.msg || '注册失败', position: 'top' })
     }
   } catch (error) {
-    console.log(error)
-    showFailToast({ message: `注册失败：${error}`, position: 'top' })
+    console.error('[register] 注册失败', error)
+    showFailToast({ message: '注册失败，请稍后重试', position: 'top' })
   } finally {
     loading.value = false
   }

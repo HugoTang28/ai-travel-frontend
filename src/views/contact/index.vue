@@ -109,7 +109,7 @@
 </template>
 
 <script setup>
-import { computed, nextTick, onMounted, ref, watch } from 'vue'
+import { computed, nextTick, onMounted, onUnmounted, ref, watch } from 'vue'
 import { showToast } from 'vant'
 
 const formatTime = (date = new Date()) => {
@@ -164,6 +164,8 @@ const contacts = ref([
 const activeContactId = ref(contacts.value[0].id)
 const draftMessage = ref('')
 const messageContainer = ref(null)
+// 模拟回复的定时器集合，卸载时统一清理，避免离开页面后仍写入消息
+const replyTimers = new Set()
 
 const activeContact = computed(() => {
   return contacts.value.find((contact) => contact.id === activeContactId.value) || contacts.value[0]
@@ -198,11 +200,13 @@ const sendMessage = () => {
   draftMessage.value = ''
   scrollToBottom()
 
-  window.setTimeout(() => {
+  const timerId = window.setTimeout(() => {
+    replyTimers.delete(timerId)
     current.messages.push(createMessage('contact', current.autoReply))
     current.pendingReplies = Math.max(0, current.pendingReplies - 1)
     scrollToBottom()
   }, 650)
+  replyTimers.add(timerId)
 }
 
 watch(activeContactId, () => {
@@ -218,6 +222,11 @@ watch(
 
 onMounted(() => {
   scrollToBottom()
+})
+
+onUnmounted(() => {
+  replyTimers.forEach((timerId) => window.clearTimeout(timerId))
+  replyTimers.clear()
 })
 </script>
 

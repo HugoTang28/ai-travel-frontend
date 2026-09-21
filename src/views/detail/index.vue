@@ -23,7 +23,7 @@
         </VanLoading>
       </div>
       <div v-else-if="errorMsg">
-        <VanEmpty description="errorMsg">
+        <VanEmpty :description="errorMsg">
           <VanButton
             type="primary"
             @click="fetchData"
@@ -143,18 +143,25 @@ const errorMsg = ref(null)
 const activeDays = ref([])
 const fetchData = async () => {
   isLoading.value = true
-  const res = await request.post('/recommend', {
-    city: formData.city,
-    budget: formData.budget,
-    days: formData.days
-  })
-  console.log(res)
-  if (res.success && res.success !== false) {
-    tripData.value = res
-  } else {
-    errorMsg.value = res.message
+  errorMsg.value = null
+  try {
+    const res = await request.post('/recommend', {
+      city: formData.city,
+      budget: formData.budget,
+      days: formData.days
+    })
+    if (res.success) {
+      tripData.value = res
+    } else {
+      errorMsg.value = res.message || '生成行程失败，请稍后重试'
+    }
+  } catch (error) {
+    // 网络错误 / 超时：结束 loading 并给出可重试的错误态
+    errorMsg.value = '请求失败，请检查网络后重试'
+    console.error('[detail] 获取行程失败', error)
+  } finally {
+    isLoading.value = false
   }
-  isLoading.value = false
 }
 const goChat = () => {
   router.push({
@@ -171,6 +178,9 @@ onMounted(() => {
   formData.days = route.query.days
   if (formData.city && formData.budget && formData.days) {
     fetchData()
+  } else {
+    // 缺少必要参数时给出明确错误态，避免页面静默空白
+    errorMsg.value = '缺少行程参数，请返回首页重新生成'
   }
 })
 </script>

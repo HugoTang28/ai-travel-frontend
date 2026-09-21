@@ -2,45 +2,67 @@ import { defineStore } from 'pinia'
 import { ref, computed } from 'vue'
 import { v4 as uuidv4 } from 'uuid'
 
+// 持久化上限：AI 长回复持续累积容易撑爆 localStorage(约5MB) 配额
+const MAX_CONVERSATIONS = 30
+const MAX_MESSAGES_PER_CONVERSATION = 100
+
+// 新建一个空对话
+const newConversation = () => ({
+  id: uuidv4(),
+  title: '新对话',
+  messages: [],
+  createdAt: Date.now()
+})
+
+// 超限时丢弃最旧的会话/消息（就地修改）
+const trimConversations = (list) => {
+  if (list.length > MAX_CONVERSATIONS) {
+    list.splice(0, list.length - MAX_CONVERSATIONS)
+  }
+  list.forEach((c) => {
+    if (Array.isArray(c.messages) && c.messages.length > MAX_MESSAGES_PER_CONVERSATION) {
+      c.messages.splice(0, c.messages.length - MAX_MESSAGES_PER_CONVERSATION)
+    }
+  })
+}
+
+// localStorage 写入可能抛 QuotaExceededError，包装一层避免整页崩溃
+const safeStorage = {
+  getItem: (key) => {
+    try {
+      return localStorage.getItem(key)
+    } catch {
+      return null
+    }
+  },
+  setItem: (key, value) => {
+    try {
+      localStorage.setItem(key, value)
+    } catch (e) {
+      console.error('[chat] 会话持久化失败(可能超出配额)', e)
+    }
+  },
+  removeItem: (key) => {
+    try {
+      localStorage.removeItem(key)
+    } catch {
+      /* 忽略 */
+    }
+  }
+}
+
 export const useChatStore = defineStore(
   'chat',
   () => {
-    // 所有对话列表
-    const conversations = ref([
-      {
-        id: '1',
-        title: '新对话',
-        messages: [], // 消息列表
-        createdAt: Date.now()
-      },
-      {
-        id: '2',
-        title: '测试对话',
-        messages: [
-          {
-            id: uuidv4(),
-            role: 'user',
-            content: '你好，这是测试消息',
-            timestamp: new Date().toISOString()
-          },
-          {
-            id: uuidv4(),
-            role: 'ai',
-            content: '这是测试消息的回复',
-            timestamp: new Date().toISOString()
-          }
-        ]
-      }
-    ])
+    // 所有对话列表（初始仅一个空对话，不内置 mock 数据）
+    const conversations = ref([newConversation()])
 
     // 当前选中的对话id
-    const currentConversationId = ref('1')
+    const currentConversationId = ref(conversations.value[0].id)
 
     // 当前对话
     const currentConversation = computed(() => {
-      return (
-        conversations.value.find((item) => item.id === currentConversationId.value) || null
-      )
+      return conversations.value.find((item) => item.id === currentConversationId.value) || null
     })
 
     // 当前对话的message
@@ -49,21 +71,24 @@ export const useChatStore = defineStore(
     })
 
     // 创建新对话并返回
-    const creatConversation = () => {
-      const newConversations = {
-        id: uuidv4(),
-        title: '新对话',
-        messages: [],
-        createdAt: Date.now()
-      }
-      conversations.value.push(newConversations)
-      currentConversationId.value = newConversations.id
-      return newConversations
+    const createConversation = () => {
+      const conv = newConversation()
+      conversations.value.push(conv)
+      trimConversations(conversations.value)
+      currentConversationId.value = conv.id
+      return conv
     }
 
     // 切换对话
     const switchConversation = (id) => {
       currentConversationId.value = id
+    }
+
+    // 清空全部会话（退出登录 / 401 时调用）
+    const resetChat = () => {
+      const conv = newConversation()
+      conversations.value = [conv]
+      currentConversationId.value = conv.id
     }
 
     // 根据首条用户消息生成对话标题
@@ -80,14 +105,18 @@ export const useChatStore = defineStore(
 
     // 添加消息到当前对话，若当前无对话则自动新建
     const addMessage = (message) => {
-      let conversation = conversations.value.find(
-        (item) => item.id === currentConversationId.value
-      )
+      let conversation = conversations.value.find((item) => item.id === currentConversationId.value)
       if (!conversation) {
-        conversation = creatConversation()
+        conversation = createConversation()
       }
       const msg = { id: uuidv4(), ...message }
       conversation.messages.push(msg)
+      if (conversation.messages.length > MAX_MESSAGES_PER_CONVERSATION) {
+        conversation.messages.splice(
+          0,
+          conversation.messages.length - MAX_MESSAGES_PER_CONVERSATION
+        )
+      }
       if (message.role === 'user') {
         updateTitleFromMessage(message)
       }
@@ -122,20 +151,18 @@ export const useChatStore = defineStore(
         if (arr.length > 0) {
           currentConversationId.value = arr[0].id
         } else {
-          creatConversation()
+          createConversation()
         }
       }
     }
 
     // 初始化守卫：持久化恢复后保证 currentConversationId 有效
-    const validCurrent = conversations.value.some(
-      (item) => item.id === currentConversationId.value
-    )
+    const validCurrent = conversations.value.some((item) => item.id === currentConversationId.value)
     if (!validCurrent) {
       if (conversations.value.length > 0) {
         currentConversationId.value = conversations.value[0].id
       } else {
-        creatConversation()
+        createConversation()
       }
     }
 
@@ -144,12 +171,30 @@ export const useChatStore = defineStore(
       currentConversationId,
       currentConversation,
       currentMessages,
-      creatConversation,
+      createConversation,
       switchConversation,
       deleteConversation,
+      resetChat,
       addMessage,
       updateMessage
     }
   },
-  { persist: true }
+  {
+    persist: {
+      storage: safeStorage,
+      // 恢复历史数据时做一次裁剪与校正，防止旧版本数据超限或脏数据
+      afterRestore: (ctx) => {
+        const store = ctx.store
+        if (!Array.isArray(store.conversations) || store.conversations.length === 0) {
+          store.resetChat()
+          return
+        }
+        trimConversations(store.conversations)
+        const valid = store.conversations.some((c) => c.id === store.currentConversationId)
+        if (!valid) {
+          store.currentConversationId = store.conversations[0].id
+        }
+      }
+    }
+  }
 )

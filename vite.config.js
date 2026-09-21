@@ -25,6 +25,21 @@ export default defineConfig(({ mode }) => {
     // "Failed to fetch dynamically imported module / 504 Outdated Optimize Dep"
     optimizeDeps: {
       include: ['marked', 'marked-highlight', 'highlight.js/lib/common', 'dompurify']
+    },
+    build: {
+      rollupOptions: {
+        output: {
+          // 把大依赖拆成独立 chunk，避免主包过大
+          manualChunks(id) {
+            if (!id.includes('node_modules')) return undefined
+            if (id.includes('vant')) return 'vant'
+            if (/node_modules[\\/](marked|marked-highlight|highlight\.js|dompurify)/.test(id)) {
+              return 'markdown'
+            }
+            return undefined
+          }
+        }
+      }
     }
   }
 })

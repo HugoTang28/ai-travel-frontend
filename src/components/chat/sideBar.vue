@@ -38,9 +38,8 @@
 import { useChatStore } from '@/store/index.js'
 import { debounce } from '@/utils/common.js'
 
+// defineModel 已内置 update:show 事件，无需再 defineEmits（同名声明 Vue 不支持）
 const show = defineModel('show', { default: false })
-
-const emit = defineEmits(['update:show'])
 
 const chatStore = useChatStore()
 const conversations = chatStore.conversations
@@ -52,19 +51,15 @@ const deleteConversations = (id) => {
 
 // 新建对话
 const addNewConversation = () => {
-  chatStore.creatConversation()
-  emit('update:show', false)
+  chatStore.createConversation()
+  show.value = false
 }
 const debounceAddNewConversation = debounce(addNewConversation, 1000, true)
 
 // 切换对话
 const switchConversation = (id) => {
-  try {
-    chatStore.switchConversation(id)
-    emit('update:show', false)
-  } catch (error) {
-    console.log('对话切换失败：', error)
-  }
+  chatStore.switchConversation(id)
+  show.value = false
 }
 </script>
 

@@ -81,15 +81,16 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { computed, ref } from 'vue'
 import { useRouter } from 'vue-router'
-import { showToast } from 'vant'
+import { showToast, showConfirmDialog } from 'vant'
 import favicon from '@/assets/images/favicon.png'
 import { useUserStore } from '@/store/index.js'
-import { removeToken } from '@/utils/common.js'
+import { clearAuthState } from '@/utils/auth.js'
 
 const userStore = useUserStore()
-const userName = userStore.userInfo.nickname || 'Test'
+// 响应式取昵称，避免 setup 一次性求值后刷新恒为兜底值
+const userName = computed(() => userStore.userInfo?.nickname || '游客')
 const router = useRouter()
 // 对话框状态
 const aboutDialogVisible = ref(false)
@@ -103,8 +104,17 @@ const goSetting = () => {
   router.push('/setting')
 }
 
-const layout = () => {
-  removeToken()
+// 退出登录：二次确认后清空 token + 用户/会话 store，防止换账号残留聊天记录
+const layout = async () => {
+  try {
+    await showConfirmDialog({
+      title: '退出登录',
+      message: '退出后将清空本地聊天记录，确定退出吗？'
+    })
+  } catch {
+    return // 用户取消
+  }
+  clearAuthState()
   router.push('/login')
   showToast('退出成功')
 }

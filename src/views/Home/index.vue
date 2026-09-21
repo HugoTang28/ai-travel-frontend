@@ -112,7 +112,7 @@
   </div>
 </template>
 <script setup>
-import { nextTick, reactive, ref, watch, onMounted, onBeforeUnmount } from 'vue'
+import { reactive, ref, onMounted, onBeforeUnmount } from 'vue'
 import { useRouter } from 'vue-router'
 import { showToast } from 'vant'
 import { debounce } from '@/utils/common.js'
@@ -146,26 +146,7 @@ const selectCity = (city) => {
   showBottom.value = false
 }
 
-const showError = () => {
-  // 判断目的地
-  if (!formData.city) {
-    showToast('请选择目的地')
-    return
-  }
-  // 判断预算
-  if (!formData.budget || formData.budget <= 100) {
-    showToast('预算不能低于100元')
-    return
-  }
-  // 判断天数
-  if (!formData.days || formData.days < 1 || formData.days > 30) {
-    showToast('天数必须在1-30天之间')
-    return
-  }
-}
 const handleSubmit = () => {
-  loading.value = true
-  // if (!showError()) return
   // 判断目的地
   if (!formData.city) {
     showToast('请选择目的地')
@@ -181,14 +162,20 @@ const handleSubmit = () => {
     showToast('天数必须在1-30天之间')
     return
   }
-  router.push({
-    path: '/detail',
-    query: {
-      city: formData.city,
-      budget: formData.budget,
-      days: formData.days
-    }
-  })
+  // 校验通过才置 loading，并在跳转完成后复位，避免按钮永久转圈
+  loading.value = true
+  router
+    .push({
+      path: '/detail',
+      query: {
+        city: formData.city,
+        budget: formData.budget,
+        days: formData.days
+      }
+    })
+    .finally(() => {
+      loading.value = false
+    })
 }
 
 const suggestRef = ref(null)
@@ -196,7 +183,7 @@ const isMenu = ref(false)
 // const selectedValues = ref(null)
 const searchCityList = ref([])
 // 模糊搜索
-const keywordChange = async (keyword) => {
+const keywordChange = async () => {
   const city = formData.city.trim()
   if (!city) {
     searchCityList.value = []

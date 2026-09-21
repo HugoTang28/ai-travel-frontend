@@ -13,7 +13,7 @@
     </div>
     <!-- 登录表单 -->
     <div class="login-form">
-      <VanForm>
+      <VanForm @submit="goHome">
         <VanCellGroup inset>
           <VanField
             v-model="form.username"
@@ -40,7 +40,6 @@
             type="primary"
             native-type="submit"
             class="login-btn"
-            @click="goHome"
           >
             登录
           </VanButton>
@@ -90,8 +89,14 @@ const goHome = async () => {
         position: 'top'
       })
       router.push(redirectPath)
+    } else {
+      // 业务失败（密码错误等）也要给出提示
+      showFailToast({
+        message: res.message || '登录失败',
+        position: 'top'
+      })
     }
-  } catch (error) {
+  } catch {
     showFailToast({
       message: `登录失败!`,
       position: 'top'

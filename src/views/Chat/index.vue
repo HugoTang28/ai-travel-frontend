@@ -72,9 +72,17 @@
       >
         <template #button>
           <VanButton
+            v-if="isStreaming"
+            size="small"
+            plain
+            @click="stopStreaming"
+          >
+            停止
+          </VanButton>
+          <VanButton
+            v-else
             type="primary"
             size="small"
-            :disabled="isStreaming"
             @click="sendMessage"
           >
             发送
@@ -87,7 +95,7 @@
 
 <script setup>
 import { useRoute } from 'vue-router'
-import { ref, computed, onMounted, nextTick } from 'vue'
+import { ref, computed, onMounted, onUnmounted, nextTick } from 'vue'
 import { fetchStream } from '@/utils/request.js'
 import { createMarkdownStreamBuffer } from '@/utils/streamBuffer.js'
 import { showToast } from 'vant'
@@ -95,7 +103,6 @@ import ChatBubble from '@/components/chat/ChatBubble.vue'
 import SideBar from '@/components/chat/sideBar.vue'
 import { useChatStore } from '@/store/index.js'
 
-// const router = useRouter()
 const route = useRoute()
 const inputMessage = ref('')
 const conversationListShow = ref(false)
@@ -113,6 +120,15 @@ const quickQuestions = [
 const isStreaming = ref(false)
 // 当前正在流式输出的消息 id（用于显示打字光标）
 const streamingId = ref('')
+// 当前流式请求的控制器与 rAF 句柄（停止生成 / 卸载清理用）
+let streamController = null
+let rafId = null
+const cancelScheduled = () => {
+  if (rafId !== null) {
+    cancelAnimationFrame(rafId)
+    rafId = null
+  }
+}
 
 // 自动滚动到底部
 const chatContainer = ref(null)
@@ -145,13 +161,6 @@ const fetchAiResponse = () => {
   const buffer = createMarkdownStreamBuffer()
 
   // 高频 chunk 用 rAF 合并成一帧一次更新，避免长文本时每个分片都触发解析 + 滚动
-  let rafId = null
-  const cancelScheduled = () => {
-    if (rafId !== null) {
-      cancelAnimationFrame(rafId)
-      rafId = null
-    }
-  }
   // done=true 表示流已结束，立即落库并收尾
   const flush = (done = false) => {
     cancelScheduled()
@@ -160,6 +169,7 @@ const fetchAiResponse = () => {
     if (done) {
       isStreaming.value = false
       streamingId.value = ''
+      streamController = null
     }
   }
   const scheduleFlush = () => {
@@ -180,7 +190,7 @@ const fetchAiResponse = () => {
     }))
     .slice(-MAX_HISTORY)
 
-  fetchStream(
+  streamController = fetchStream(
     'chat',
     { messages: history },
     (chunk) => {
@@ -227,6 +237,18 @@ const sendMessage = () => {
 const openConversationList = () => {
   conversationListShow.value = true
 }
+
+// 停止生成：中断流式请求（fetchStream 内部会按正常完成处理，保留已输出内容）
+const stopStreaming = () => {
+  streamController?.abort()
+  streamController = null
+}
+
+// 离开页面：中断请求 + 清理未执行的 rAF，避免后台继续写 store
+onUnmounted(() => {
+  stopStreaming()
+  cancelScheduled()
+})
 
 onMounted(async () => {
   if (route.query.scene === 'detail' && route.query.city) {
@@ -296,7 +318,8 @@ onMounted(async () => {
 
 .chat-input-area {
   position: fixed;
-  bottom: 50px;
+  /* 50px 为 tabbar 高度，叠加安全区避免 iPhone Home Indicator 遮挡 */
+  bottom: calc(50px + env(safe-area-inset-bottom));
   left: 0;
   right: 0;
   background: #fff;
