@@ -123,8 +123,11 @@ const selectTag = (tag) => {
   inputMessage.value = tag
 }
 
-// 获取响应
-const fetchAiResponse = (userMsg) => {
+// 最多携带给后端的会话历史条数，避免 token 超限
+const MAX_HISTORY = 20
+
+// 获取响应（方案 A：把当前对话的完整历史发给后端，后端无状态）
+const fetchAiResponse = () => {
   isStreaming.value = true
   // 先写入一条空的 AI 消息占位，拿到 id 用于流式增量更新
   const aiMsg = chatStore.addMessage({
@@ -135,9 +138,19 @@ const fetchAiResponse = (userMsg) => {
   const aiId = aiMsg.id
   let fullResponse = ''
 
+  // 取当前会话全部消息，排除刚写入的空占位 AI 消息，映射成接口要求的 messages 格式
+  // 只保留最近 MAX_HISTORY 条，避免 token 超限
+  const history = chatStore.currentMessages
+    .filter((m) => !(m.role === 'ai' && m.content === ''))
+    .map((m) => ({
+      role: m.role === 'ai' ? 'assistant' : m.role,
+      content: m.content
+    }))
+    .slice(-MAX_HISTORY)
+
   fetchStream(
     'chat',
-    { message: userMsg },
+    { messages: history },
     (chunk) => {
       fullResponse += chunk
       // 增量写回 store 当前对话，视图自动同步
@@ -172,8 +185,8 @@ const sendMessage = () => {
   })
   inputMessage.value = ''
   scrollToBottom()
-  // 进行流式请求
-  fetchAiResponse(msg)
+  // 进行流式请求（历史由当前对话自动构建并发送给后端）
+  fetchAiResponse()
 }
 
 // 打开对话列表弹框
