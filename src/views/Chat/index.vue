@@ -48,6 +48,7 @@
           v-for="msg in messages"
           :key="msg.id"
           :message="msg"
+          :streaming="isStreaming && msg.id === streamingId"
         ></ChatBubble>
         <div
           v-if="isStreaming"
@@ -88,6 +89,7 @@
 import { useRoute } from 'vue-router'
 import { ref, computed, onMounted, nextTick } from 'vue'
 import { fetchStream } from '@/utils/request.js'
+import { createMarkdownStreamBuffer } from '@/utils/streamBuffer.js'
 import { showToast } from 'vant'
 import ChatBubble from '@/components/chat/ChatBubble.vue'
 import SideBar from '@/components/chat/sideBar.vue'
@@ -109,6 +111,8 @@ const quickQuestions = [
 ]
 
 const isStreaming = ref(false)
+// 当前正在流式输出的消息 id（用于显示打字光标）
+const streamingId = ref('')
 
 // 自动滚动到底部
 const chatContainer = ref(null)
@@ -136,7 +140,35 @@ const fetchAiResponse = () => {
     timestamp: new Date().toISOString()
   })
   const aiId = aiMsg.id
-  let fullResponse = ''
+  streamingId.value = aiId
+  // 流式缓冲区：统一换行 + 累积全文（未闭合的代码块由气泡渲染时再切分）
+  const buffer = createMarkdownStreamBuffer()
+
+  // 高频 chunk 用 rAF 合并成一帧一次更新，避免长文本时每个分片都触发解析 + 滚动
+  let rafId = null
+  const cancelScheduled = () => {
+    if (rafId !== null) {
+      cancelAnimationFrame(rafId)
+      rafId = null
+    }
+  }
+  // done=true 表示流已结束，立即落库并收尾
+  const flush = (done = false) => {
+    cancelScheduled()
+    chatStore.updateMessage(aiId, buffer.raw)
+    scrollToBottom()
+    if (done) {
+      isStreaming.value = false
+      streamingId.value = ''
+    }
+  }
+  const scheduleFlush = () => {
+    if (rafId !== null) return
+    rafId = requestAnimationFrame(() => {
+      rafId = null
+      flush()
+    })
+  }
 
   // 取当前会话全部消息，排除刚写入的空占位 AI 消息，映射成接口要求的 messages 格式
   // 只保留最近 MAX_HISTORY 条，避免 token 超限
@@ -152,20 +184,22 @@ const fetchAiResponse = () => {
     'chat',
     { messages: history },
     (chunk) => {
-      fullResponse += chunk
-      // 增量写回 store 当前对话，视图自动同步
-      chatStore.updateMessage(aiId, fullResponse)
-      scrollToBottom()
+      // 只做累积，写入与渲染交给下一帧统一处理
+      buffer.push(chunk)
+      scheduleFlush()
     },
     () => {
-      chatStore.updateMessage(aiId, fullResponse)
-      isStreaming.value = false
-      scrollToBottom()
+      // 流结束：把完整原文落库（此时围栏已闭合，气泡会正常高亮）
+      flush(true)
     },
     (errMsg) => {
-      chatStore.updateMessage(aiId, `抱歉，AI发生了错误${errMsg}`)
-      isStreaming.value = false
-      scrollToBottom()
+      // 中断时若代码块还没闭合，先补上围栏，避免错误提示被当成代码
+      if (buffer.split().pendingIsCode) {
+        buffer.push('\n```\n')
+      }
+      // 保留已输出的部分内容，只追加错误提示，避免整条消息被覆盖
+      buffer.push(`\n\n> 抱歉，AI发生了错误：${errMsg || '未知错误'}`)
+      flush(true)
       showToast('AI回复失败！')
     }
   )

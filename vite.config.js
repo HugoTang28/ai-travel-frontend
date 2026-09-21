@@ -20,6 +20,11 @@ export default defineConfig(({ mode }) => {
       alias: {
         '@': path.resolve(__dirname, 'src')
       }
+    },
+    // 启动时就预构建这些依赖，避免运行中才发现新包触发 re-optimize 导致
+    // "Failed to fetch dynamically imported module / 504 Outdated Optimize Dep"
+    optimizeDeps: {
+      include: ['marked', 'marked-highlight', 'highlight.js/lib/common', 'dompurify']
     }
   }
 })
