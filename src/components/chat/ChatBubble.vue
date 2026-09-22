@@ -14,11 +14,11 @@
         v-else
         class="message-text ai-message"
       >
-        <div
-          v-if="renderedHtml"
-          class="markdown-body"
-          v-html="renderedHtml"
-        ></div>
+        <!-- 已闭合部分：用渲染函数把清洗后的 HTML 转成 VNode，不使用 v-html -->
+        <MarkdownContent
+          v-if="completeMarkdown"
+          :content="completeMarkdown"
+        />
         <!-- 流式未闭合的代码块：原样输出，等 ``` 闭合后再走 marked + 高亮 -->
         <pre
           v-if="pendingCode"
@@ -30,6 +30,15 @@
         ></span>
       </div>
     </div>
+    <VanButton
+      v-if="message.content && !streaming"
+      class="copy-btn"
+      size="mini"
+      plain
+      :icon="copied ? 'success' : 'notes-o'"
+      :title="copied ? '已复制' : '复制'"
+      @click="copyContent"
+    ></VanButton>
     <div
       v-if="showTime"
       class="message-time"
@@ -40,9 +49,10 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
-import { renderMarkdown } from '@/utils/markdown.js'
+import { computed, ref } from 'vue'
 import { splitStreamMarkdown } from '@/utils/streamBuffer.js'
+import { showToast } from 'vant'
+import MarkdownContent from '@/components/chat/MarkdownContent.vue'
 
 const props = defineProps({
   message: {
@@ -63,11 +73,10 @@ const messageClass = computed(() => {
 // 流式场景下把「已闭合内容」和「未闭合的代码块」切开，避免半个 ``` 导致渲染错乱
 const streamParts = computed(() => splitStreamMarkdown(props.message.content || ''))
 
-// 已闭合部分交给 marked + DOMPurify（user 消息保持纯文本，不解析）
-const renderedHtml = computed(() => {
+// 已闭合部分（user 消息不解析），交给 MarkdownContent 渲染
+const completeMarkdown = computed(() => {
   if (props.message.role !== 'ai') return ''
-  const { complete } = streamParts.value
-  return complete ? renderMarkdown(complete) : ''
+  return streamParts.value.complete || ''
 })
 
 // 未闭合代码块内的代码（不含 ``` 行），流式结束前不高亮
@@ -77,6 +86,34 @@ const pendingLangClass = computed(() => {
   const lang = streamParts.value.lang
   return lang ? `language-${lang}` : ''
 })
+
+// 复制消息原文（AI 为 markdown 源码，用户为纯文本），便于二次粘贴
+const copied = ref(false)
+let copyTimer = null
+const copyContent = async () => {
+  const text = props.message.content || ''
+  if (!text) return
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text)
+    } else {
+      const ta = document.createElement('textarea')
+      ta.value = text
+      ta.style.position = 'fixed'
+      ta.style.opacity = '0'
+      document.body.appendChild(ta)
+      ta.select()
+      document.execCommand('copy')
+      document.body.removeChild(ta)
+    }
+    copied.value = true
+    showToast('已复制')
+    clearTimeout(copyTimer)
+    copyTimer = setTimeout(() => (copied.value = false), 1500)
+  } catch {
+    showToast('复制失败')
+  }
+}
 
 const showTime = computed(() => {
   return props.message.timestamp && props.message.content
@@ -131,6 +168,16 @@ const formatTime = computed(() => {
   color: #999;
   margin-top: 4px;
   padding: 0 4px;
+}
+
+/* 复制按钮：跟随气泡对齐方向（ai 居左 / user 居右） */
+.copy-btn {
+  margin-top: 4px;
+  align-self: flex-start;
+}
+
+.user-message .copy-btn {
+  align-self: flex-end;
 }
 
 /* AI 回复的 Markdown 排版 */

@@ -3,6 +3,7 @@ import { markedHighlight } from 'marked-highlight'
 import hljs from 'highlight.js/lib/common'
 import DOMPurifyModule from 'dompurify'
 import 'highlight.js/styles/atom-one-dark.css'
+import { h } from 'vue'
 
 // 兼容不同构建下 dompurify 的导出形态：实例对象 / 工厂函数
 const resolvePurify = () => {
@@ -110,3 +111,56 @@ export function renderMarkdown(text) {
 }
 
 export default renderMarkdown
+
+// 仅放行安全的 HTML 属性（DOM 已被 DOMPurify 清洗过，这里再做一次白名单收窄）
+const ALLOWED_ATTRS = new Set([
+  'class',
+  'href',
+  'src',
+  'alt',
+  'title',
+  'target',
+  'rel',
+  'loading',
+  'referrerpolicy',
+  'type',
+  'colspan',
+  'rowspan',
+  'align',
+  'width',
+  'height'
+])
+
+/**
+ * @desc 把「已 DOMPurify 清洗」的 HTML 字符串转成 Vue VNode 数组，
+ *       用于替代 v-html：全程只创建已知标签 + 文本节点，不碰 innerHTML，从根上杜绝 XSS。
+ * @param {string} html 清洗后的安全 HTML
+ * @returns {Array} VNode 数组
+ */
+export function htmlToVNodes(html) {
+  if (typeof window === 'undefined' || typeof DOMParser === 'undefined') return []
+  const doc = new DOMParser().parseFromString(html || '', 'text/html')
+
+  const build = (node) => {
+    if (node.nodeType === 3) return node.nodeValue // 文本节点
+    if (node.nodeType !== 1) return null // 跳过注释等
+    const tag = node.tagName.toLowerCase()
+    const props = {}
+    for (const attr of node.attributes) {
+      if (ALLOWED_ATTRS.has(attr.name)) props[attr.name] = attr.value
+    }
+    const children = []
+    node.childNodes.forEach((child) => {
+      const v = build(child)
+      if (v !== null && v !== '') children.push(v)
+    })
+    return h(tag, props, children.length ? children : undefined)
+  }
+
+  const result = []
+  doc.body.childNodes.forEach((child) => {
+    const v = build(child)
+    if (v !== null) result.push(v)
+  })
+  return result
+}
