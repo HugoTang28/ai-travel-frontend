@@ -14,7 +14,6 @@
         v-else
         class="message-text ai-message"
       >
-        <!-- 已闭合部分：用渲染函数把清洗后的 HTML 转成 VNode，不使用 v-html -->
         <MarkdownContent
           v-if="completeMarkdown"
           :content="completeMarkdown"
